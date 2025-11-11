@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: taskapp-backend
+    env: java
+    rootDir: backend
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/*.jar
+    plan: free
