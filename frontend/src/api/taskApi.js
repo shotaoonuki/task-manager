@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080/api/tasks"; // ← ここを修正！
+// ← ここを環境変数ベースに変更
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/tasks";
 
 export const getTasks = async () => {
   const res = await axios.get(API_BASE_URL);
