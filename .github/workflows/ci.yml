@@ -26,3 +26,10 @@ jobs:
       - name: Run tests
         working-directory: ./backend/taskapp
         run: ./mvnw test
+
+      - name: Deploy to Render (only on main)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          curl -X POST "$RENDER_DEPLOY_HOOK"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
