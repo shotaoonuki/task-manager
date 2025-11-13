@@ -15,9 +15,10 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**")
                         .allowedOrigins(
-                          "https://task-manager-portfolio-v2.vercel.app",
-                          "https://task-manager-portfolio-v2-git-main-shotas-projects-7e17bf9d.vercel.app",
-                          "https://task-manager-portfolio-v2-h2giwkwfi-shotas-projects-7e17bf9d.vercel.app"
+                                "http://localhost:5173",
+                                "https://task-manager-portfolio-v2.vercel.app",
+                                "https://task-manager-portfolio-v2-git-main-shotas-projects-7e17bf9d.vercel.app",
+                                "https://task-manager-portfolio-v2-h2giwkwfi-shotas-projects-7e17bf9d.vercel.app"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
