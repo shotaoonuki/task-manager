@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:8080/api"; // ←ローカルならこれ
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -10,7 +10,6 @@ export const api = axios.create({
   timeout: 8000,
 });
 
-// 共通エラーハンドリング（オプション）
 api.interceptors.response.use(
   (res) => res,
   (err) => {
