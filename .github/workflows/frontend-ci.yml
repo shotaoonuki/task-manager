@@ -2,13 +2,9 @@ name: Frontend CI
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [ "main", "develop" ]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [ "main", "develop" ]
 
 jobs:
   build:
@@ -21,20 +17,20 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
 
       - name: Install dependencies
-        working-directory: ./frontend
+        working-directory: ./src
         run: npm install
 
       - name: Lint
-        working-directory: ./frontend
+        working-directory: ./src
         run: npm run lint
 
       - name: TypeScript check
-        working-directory: ./frontend
+        working-directory: ./src
         run: npm run type-check
 
       - name: Build
-        working-directory: ./frontend
+        working-directory: ./src
         run: npm run build
