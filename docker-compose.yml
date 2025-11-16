@@ -1,0 +1,65 @@
+version: '3.9'
+
+services:
+  # ============================
+  # Frontend (Nginx)
+  # ============================
+  front:
+    build:
+      context: .         # ← ここを src に！！
+      dockerfile: Dockerfile  # ← src 内の Dockerfile を参照
+      args:
+        VITE_API_URL: "http://localhost:8080/api"
+    ports:
+      - "5173:80"   # ← http://localhost:5173 でフロントにアクセス
+    depends_on:
+      - api
+    env_file:
+      - ./src/.env.docker
+    networks:
+      - app-net
+
+  # ============================
+  # Backend (Spring Boot)
+  # ============================
+  api:
+    build:
+      context: ./backend/taskapp
+      dockerfile: Dockerfile.local
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/taskdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - db
+    restart: always   # ←これを追加
+    networks:
+      - app-net
+
+  # ============================
+  # Database (PostgreSQL)
+  # ============================
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: taskdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-net
+
+# ============================
+# Networks / Volumes
+# ============================
+networks:
+  app-net:
+
+volumes:
+  postgres_data:
