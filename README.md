@@ -1,4 +1,4 @@
-# 📝 Task Manager
+# 📝 タスク管理アプリ
 
 **React × TypeScript × Spring Boot × PostgreSQL × Docker × Cloudflare Pages × Render**  
 フロント〜バックエンド〜DB〜CI/CDまで **完全自走で構築したフルスタックアプリケーション** です。
