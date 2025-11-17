@@ -1,4 +1,4 @@
-name: CI
+name: Backend CI
 
 on:
   push:
@@ -20,16 +20,16 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: Grant execute permission for mvnw
-        run: chmod +x ./backend/taskapp/mvnw
+      - name: Grant execute permission to mvnw
+        run: chmod +x ./backend/mvnw
 
-      - name: Run tests
-        working-directory: ./backend/taskapp
+      - name: Build & Test (Maven)
+        working-directory: ./backend
         run: ./mvnw test
 
-      - name: Deploy to Render (only on main)
+      # Render デプロイ
+      - name: Deploy to Render (on main only)
         if: github.ref == 'refs/heads/main'
-        run: |
-          curl -X POST "$RENDER_DEPLOY_HOOK"
+        run: curl -X POST "$RENDER_DEPLOY_HOOK"
         env:
           RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
