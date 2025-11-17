@@ -16,10 +16,7 @@ public class CorsConfig {
                 registry.addMapping("/api/**")
                         .allowedOrigins(
                                 "http://localhost:5173",
-                                "https://task-manager-portfolio-v2.pages.dev", // ← ★ これが本番フロント！
-                                "https://task-manager-portfolio-v2.vercel.app",
-                                "https://task-manager-portfolio-v2-git-main-shotas-projects-7e17bf9d.vercel.app",
-                                "https://task-manager-portfolio-v2-h2giwkwfi-shotas-projects-7e17bf9d.vercel.app"
+                                "https://task-manager-7k8.pages.dev"
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
