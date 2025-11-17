@@ -6,8 +6,8 @@ services:
   # ============================
   front:
     build:
-      context: .         # ← ここを src に！！
-      dockerfile: Dockerfile  # ← src 内の Dockerfile を参照
+      context: ./frontend
+      dockerfile: Dockerfile
       args:
         VITE_API_URL: "http://localhost:8080/api"
     ports:
@@ -15,7 +15,7 @@ services:
     depends_on:
       - api
     env_file:
-      - ./src/.env.docker
+      - ./frontend/.env.docker
     networks:
       - app-net
 
@@ -24,7 +24,7 @@ services:
   # ============================
   api:
     build:
-      context: ./backend/taskapp
+      context: ./backend
       dockerfile: Dockerfile.local
     ports:
       - "8080:8080"
