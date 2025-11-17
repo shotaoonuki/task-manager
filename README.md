@@ -1,4 +1,4 @@
-# 📝 Task Manager App（最新構成版）
+# 📝 Task Manager
 
 **React × TypeScript × Spring Boot × PostgreSQL × Docker × Cloudflare Pages × Render**  
 フロント〜バックエンド〜DB〜CI/CDまで **完全自走で構築したフルスタックアプリケーション** です。
@@ -84,7 +84,7 @@ React のベストプラクティクス（Hooks、カスタムフック、型定
 
 ---
 
-## 💡 アーキテクチャ構成図（最新）
+## 💡 アーキテクチャ構成図
 
 ```
 Cloudflare Pages (React + TypeScript)
