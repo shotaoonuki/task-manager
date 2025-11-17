@@ -14,13 +14,14 @@ public class TaskController {
 
     private final TaskRepository taskRepository;
 
-    public TaskController(TaskRepository taskRepository) {
+    public TaskController(TaskRepository taskRepository) {    
         this.taskRepository = taskRepository;
     }
 
     // ✅ 全タスク取得
     @GetMapping
     public List<Task> getAllTasks() {
+        System.out.println("🔥 API accessed: /api/tasks");
         return taskRepository.findAll();
     }
 
