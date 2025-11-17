@@ -21,7 +21,6 @@ public class TaskController {
     // ✅ 全タスク取得
     @GetMapping
     public List<Task> getAllTasks() {
-        System.out.println("🔥 API accessed: /api/tasks");
         return taskRepository.findAll();
     }
 
