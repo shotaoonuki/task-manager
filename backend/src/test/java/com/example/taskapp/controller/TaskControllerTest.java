@@ -9,12 +9,13 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = TaskappApplication.class)
-@AutoConfigureMockMvc(addFilters = false) 
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 class TaskControllerTest {
 
@@ -23,8 +24,10 @@ class TaskControllerTest {
 
     @Test
     @DisplayName("GET /api/tasks returns 200")
+    @WithMockUser(username = "test@example.com")
     void testGetTasks_Returns200() throws Exception {
         mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isOk());
     }
+
 }
