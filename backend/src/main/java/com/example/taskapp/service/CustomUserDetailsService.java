@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.context.annotation.Profile;
 
 @Service
-@Profile("!test")
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
