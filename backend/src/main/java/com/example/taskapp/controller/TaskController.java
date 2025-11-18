@@ -4,8 +4,9 @@ import com.example.taskapp.entity.Task;
 import com.example.taskapp.entity.User;
 import com.example.taskapp.repository.TaskRepository;
 import com.example.taskapp.repository.UserRepository;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -27,35 +28,26 @@ public class TaskController {
 
     // 🔹 ログイン中ユーザーのタスク一覧
     @GetMapping
-    public List<Task> getAllTasks(@AuthenticationPrincipal UserDetails userDetails) {
-
-        // SecurityConfig で /api/** は authenticated にしているので
-        // normally userDetails は null じゃない想定
-        User user = findUser(userDetails);
-
+    public List<Task> getAllTasks() {
+        User user = getCurrentUser();
         return taskRepository.findByUser(user);
     }
 
     // 🔹 新規タスク作成
     @PostMapping
-    public Task createTask(@RequestBody Task task,
-                           @AuthenticationPrincipal UserDetails userDetails) {
-
-        User user = findUser(userDetails);
-
+    public Task createTask(@RequestBody Task task) {
+        User user = getCurrentUser();
         task.setUser(user);
         task.setCreatedAt(LocalDateTime.now());
-
         return taskRepository.save(task);
     }
 
     // 🔹 更新（自分のタスクしか更新できない）
     @PutMapping("/{id}")
     public Task updateTask(@PathVariable Long id,
-                           @RequestBody Task updatedTask,
-                           @AuthenticationPrincipal UserDetails userDetails) {
+                           @RequestBody Task updatedTask) {
 
-        User user = findUser(userDetails);
+        User user = getCurrentUser();
 
         Task task = taskRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new RuntimeException("Task not found or no permission"));
@@ -71,10 +63,8 @@ public class TaskController {
 
     // 🔹 削除（自分のタスクのみ）
     @DeleteMapping("/{id}")
-    public void deleteTask(@PathVariable Long id,
-                           @AuthenticationPrincipal UserDetails userDetails) {
-
-        User user = findUser(userDetails);
+    public void deleteTask(@PathVariable Long id) {
+        User user = getCurrentUser();
 
         Task task = taskRepository.findByIdAndUser(id, user)
                 .orElseThrow(() -> new RuntimeException("Task not found or no permission"));
@@ -82,12 +72,17 @@ public class TaskController {
         taskRepository.delete(task);
     }
 
-    // 共通：ログインユーザーを取得
-    private User findUser(UserDetails userDetails) {
-        if (userDetails == null) {
+    // 🔹 共通：ログイン中ユーザーを取得（UserDetails なし）
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
             throw new RuntimeException("Unauthenticated");
         }
-        return userRepository.findByEmail(userDetails.getUsername())
+
+        String email = auth.getName();
+
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
