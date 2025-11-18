@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = TaskappApplication.class)
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) 
 @ActiveProfiles("test")
 class TaskControllerTest {
 
