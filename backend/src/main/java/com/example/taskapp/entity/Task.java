@@ -21,4 +21,8 @@ public class Task {
     private LocalDate dueDate;   // 締切日
     private String priority;     // 優先度（low, medium, high）
 
+    // 🔥 ユーザーと紐づける（ここが重要！）
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
