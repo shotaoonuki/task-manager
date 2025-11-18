@@ -26,14 +26,16 @@ public class TaskController {
         this.userRepository = userRepository;
     }
 
-    // 🔹 ログイン中ユーザーのタスク一覧
+    // ==========================================
+    // 🔹 ログイン中ユーザー用 API
+    // ==========================================
+
     @GetMapping
     public List<Task> getAllTasks() {
         User user = getCurrentUser();
         return taskRepository.findByUser(user);
     }
 
-    // 🔹 新規タスク作成
     @PostMapping
     public Task createTask(@RequestBody Task task) {
         User user = getCurrentUser();
@@ -42,7 +44,6 @@ public class TaskController {
         return taskRepository.save(task);
     }
 
-    // 🔹 更新（自分のタスクしか更新できない）
     @PutMapping("/{id}")
     public Task updateTask(@PathVariable Long id,
                            @RequestBody Task updatedTask) {
@@ -61,7 +62,6 @@ public class TaskController {
         return taskRepository.save(task);
     }
 
-    // 🔹 削除（自分のタスクのみ）
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable Long id) {
         User user = getCurrentUser();
@@ -72,7 +72,47 @@ public class TaskController {
         taskRepository.delete(task);
     }
 
-    // 🔹 共通：ログイン中ユーザーを取得（UserDetails なし）
+    // ==========================================
+    // 👤 ゲスト（非ログイン）用 API
+    // ==========================================
+
+    @GetMapping("/public")
+    public List<Task> getPublicTasks() {
+        return taskRepository.findByUser(null);
+    }
+
+    @PostMapping("/public")
+    public Task createPublicTask(@RequestBody Task task) {
+        task.setUser(null);
+        task.setCreatedAt(LocalDateTime.now());
+        return taskRepository.save(task);
+    }
+
+    @PutMapping("/public/{id}")
+    public Task updatePublicTask(@PathVariable Long id, @RequestBody Task updatedTask) {
+        Task task = taskRepository.findByIdAndUser(id, null)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        task.setTitle(updatedTask.getTitle());
+        task.setDescription(updatedTask.getDescription());
+        task.setCompleted(updatedTask.isCompleted());
+        task.setDueDate(updatedTask.getDueDate());
+        task.setPriority(updatedTask.getPriority());
+
+        return taskRepository.save(task);
+    }
+
+    @DeleteMapping("/public/{id}")
+    public void deletePublicTask(@PathVariable Long id) {
+        Task task = taskRepository.findByIdAndUser(id, null)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        taskRepository.delete(task);
+    }
+
+    // ==========================================
+    // 共通：ログイン中ユーザー取得
+    // ==========================================
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
