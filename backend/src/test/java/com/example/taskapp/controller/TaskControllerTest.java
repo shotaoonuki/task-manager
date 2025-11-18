@@ -10,24 +10,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.jdbc.Sql;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = TaskappApplication.class)
-@AutoConfigureMockMvc(addFilters = false)
+
+@SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Sql("/data-test.sql")  // ← テスト用ユーザー登録
 class TaskControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    @DisplayName("GET /api/tasks returns 200")
-    @WithMockUser(username = "test@example.com")
+    @WithMockUser(username = "user")  // auth.getName() = "user"
     void testGetTasks_Returns200() throws Exception {
         mockMvc.perform(get("/api/tasks"))
                 .andExpect(status().isOk());
     }
-
 }
