@@ -1,0 +1,12 @@
+name: Deploy Backend Prod
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Render (Production)
+        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"

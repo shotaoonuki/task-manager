@@ -4,6 +4,8 @@ import TaskItem from "./TaskItem";
 import TaskForm from "./TaskForm";
 import TaskModal from "./TaskModal";
 import type { Priority } from "../types/task";
+import toast from "react-hot-toast";
+
 
 export default function TaskList() {
   const {
@@ -91,7 +93,7 @@ export default function TaskList() {
   };
 
   return (
-    <div className="p-8 max-w-2xl mx-auto bg-white shadow-xl rounded-xl">
+    <div className="pt-36 p-8 max-w-2xl mx-auto bg-white shadow-xl rounded-xl">
       <h1 className="text-3xl font-bold text-center text-blue-600 mb-4">
         📝 タスク管理アプリ
       </h1>
@@ -127,25 +129,22 @@ export default function TaskList() {
       <div className="flex justify-center gap-2 mb-4">
         <button
           onClick={() => setFilter("all")}
-          className={`px-3 py-1 rounded ${
-            filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
+          className={`px-3 py-1 rounded ${filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
         >
           すべて
         </button>
         <button
           onClick={() => setFilter("active")}
-          className={`px-3 py-1 rounded ${
-            filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
+          className={`px-3 py-1 rounded ${filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
         >
           未完了
         </button>
         <button
           onClick={() => setFilter("completed")}
-          className={`px-3 py-1 rounded ${
-            filter === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"
-          }`}
+          className={`px-3 py-1 rounded ${filter === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"
+            }`}
         >
           完了
         </button>
@@ -167,11 +166,15 @@ export default function TaskList() {
 
       <div className="flex justify-center mb-4">
         <button
-          onClick={fetchTasks}
+          onClick={async () => {
+            await fetchTasks();
+            toast.success("🔄 サーバーと同期しました");
+          }}
           className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg shadow"
         >
           🔄 サーバーと同期
         </button>
+
       </div>
 
       {loading && <p className="text-gray-500 text-center">📡 読み込み中...</p>}
