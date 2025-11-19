@@ -32,6 +32,7 @@ public class SecurityConfig {
                     var corsConfig = new org.springframework.web.cors.CorsConfiguration();
                     corsConfig.addAllowedOrigin("http://localhost:5173");
                     corsConfig.addAllowedOrigin("https://task-manager-7k8.pages.dev");
+                    corsConfig.addAllowedOrigin("https://task-manager-dev.pages.dev");
                     corsConfig.setAllowCredentials(true);
                     corsConfig.addAllowedHeader("*");
                     corsConfig.addAllowedMethod("*");
