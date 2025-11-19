@@ -1,5 +1,15 @@
 # 📝 タスク管理アプリ（JWT 認証対応）
 
+## 🔍 採用担当の方向け（このアプリで分かる私のスキル）
+
+- フロント〜バック〜DB〜認証〜CI/CD まで **すべて自走で構築できる**
+- JWT 認証／SecurityFilter／Token 検証など、**実務レベルの認証ロジックを理解して実装**
+- React × TypeScript の **型安全な設計**（Custom Hooks、型定義、状態管理）
+- Docker Compose で **本番と同じ構成のローカル環境**を構築
+- GitHub Actions（CI）＋ Render / Cloudflare（CD）で **本番・開発の自動デプロイを構築**
+- 開発環境（dev）と本番環境（main）を分離し、実務同様の運用フローを再現
+- UI/UX 改善（モーダル、フィルタ、優先度カラー、締切色分けなど）
+
 **React × TypeScript × Spring Boot × PostgreSQL × JWT × Docker × Cloudflare Pages × Render**  
 フロント〜バックエンド〜DB〜認証〜CI/CDまで **完全自走で構築したフルスタックアプリケーション** です。
 
