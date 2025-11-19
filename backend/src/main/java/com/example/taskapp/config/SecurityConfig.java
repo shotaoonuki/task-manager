@@ -39,8 +39,15 @@ public class SecurityConfig {
                 }))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        // 認証不要のエンドポイント
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/tasks/public/**").permitAll()   // ← 追加！
+
+                        // 認証必要
                         .requestMatchers("/api/**").authenticated()
+
+                        // その他は公開
                         .anyRequest().permitAll()
                 )
                 // JWTフィルタを追加
