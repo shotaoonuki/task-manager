@@ -2,9 +2,17 @@ name: Backend CI
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
+      - 'feature-*'
+      - 'feature/**'
   pull_request:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
+      - 'feature-*'
+      - 'feature/**'
 
 jobs:
   build:
@@ -26,10 +34,3 @@ jobs:
       - name: Build & Test (Maven)
         working-directory: ./backend
         run: ./mvnw test
-
-      # Render デプロイ
-      - name: Deploy to Render (on main only)
-        if: github.ref == 'refs/heads/main'
-        run: curl -X POST "$RENDER_DEPLOY_HOOK"
-        env:
-          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
