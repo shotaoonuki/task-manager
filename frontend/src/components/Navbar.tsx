@@ -17,7 +17,7 @@ export default function Navbar({ isAuthed }: { isAuthed: boolean }) {
         className="text-xl font-bold text-blue-600 cursor-pointer"
         onClick={() => navigate("/")}
       >
-        📝 Task Manager
+        📝 タスク管理アプリ
       </h1>
 
       <div className="flex gap-3">
