@@ -40,17 +40,19 @@ public class SecurityConfig {
                 }))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-
-                        // 認証不要のエンドポイント
+                                
+                        // ① 最優先：public API を一番上に持ってくる
+                        .requestMatchers("/api/tasks/public/**").permitAll()
+                                
+                        // ② その次に auth などの公開API
                         .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/tasks/public/**").permitAll()   // ← 追加！
-
-                        // 認証必要
+                                
+                        // ③ 最後に /api/** を認証必須にする
                         .requestMatchers("/api/**").authenticated()
-
-                        // その他は公開
+                                
                         .anyRequest().permitAll()
                 )
+                
                 // JWTフィルタを追加
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
