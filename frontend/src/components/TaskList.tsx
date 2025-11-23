@@ -215,6 +215,11 @@ export default function TaskList() {
           getDueDateColor={getDueDateColor}
         />
       )}
+
+      {/* デバッグ */}
+      <pre className="mt-6 text-xs bg-gray-100 p-3 rounded overflow-x-auto">
+        {JSON.stringify(tasks, null, 2)}
+      </pre>
     </div>
   );
 }
