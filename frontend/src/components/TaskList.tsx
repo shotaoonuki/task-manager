@@ -36,6 +36,8 @@ export default function TaskList() {
 
     openModal,
     closeModal,
+
+    handleGenerateSubtasks,
   } = useTasks();
 
   // フォーム用
@@ -123,6 +125,7 @@ export default function TaskList() {
         onChangeDueDate={setNewDueDate}
         onChangePriority={setNewPriority}
         onAdd={addNewTask}
+        onGenerateSubtasks={handleGenerateSubtasks}
       />
 
       {/* フィルター & ソート */}

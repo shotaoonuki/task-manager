@@ -9,6 +9,13 @@ export interface Task {
   priority: Priority;
 }
 
+export interface Subtask {
+  id: number;
+  title: string;
+  completed: boolean;
+  taskId: number;
+}
+
 export interface EditData {
   title: string;
   dueDate: string;

@@ -43,11 +43,17 @@ public class SecurityConfig {
                                 
                         // ① 最優先：public API を一番上に持ってくる
                         .requestMatchers("/api/tasks/public/**").permitAll()
+                        
+                        // ② サブタスク関連エンドポイント（ログイン不要）
+                        // パターンを具体的に指定して、publicタスクのサブタスクも含める
+                        .requestMatchers("/api/tasks/*/subtasks/generate").permitAll()
+                        .requestMatchers("/api/tasks/*/subtasks").permitAll()
+                        .requestMatchers("/api/tasks/*/subtasks/*").permitAll()
                                 
-                        // ② その次に auth などの公開API
+                        // ③ その次に auth などの公開API
                         .requestMatchers("/auth/**").permitAll()
                                 
-                        // ③ 最後に /api/** を認証必須にする
+                        // ④ 最後に /api/** を認証必須にする
                         .requestMatchers("/api/**").authenticated()
                                 
                         .anyRequest().permitAll()
