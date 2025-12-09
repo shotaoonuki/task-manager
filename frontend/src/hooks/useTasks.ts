@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosInstance";
 import type { Task, EditData } from "../types/task";
+import { generateSubtasks } from "../api/subtaskApi";
 import toast from "react-hot-toast";
 
 export function useTasks() {
@@ -41,10 +42,18 @@ export function useTasks() {
     try {
       const url = token ? "/api/tasks" : "/api/tasks/public";
       const res = await api.get(url);
-      setTasks(res.data);
-    } catch (err) {
-      setError("タスク取得に失敗しました");
-      toast.error("タスク取得に失敗しました");
+      // レスポンスが配列であることを確認
+      const tasksData = Array.isArray(res.data) ? res.data : [];
+      setTasks(tasksData);
+    } catch (err: any) {
+      console.error("Failed to fetch tasks:", err);
+      const errorMessage = err.response?.status === 404
+        ? "バックエンドサーバーが起動していないか、エンドポイントが見つかりません"
+        : err.response?.data?.message || "タスク取得に失敗しました";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      // エラー時も空配列を設定
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -55,10 +64,108 @@ export function useTasks() {
       const url = token ? "/api/tasks" : "/api/tasks/public";
       const res = await api.post(url, task);
 
-      setTasks([...tasks, res.data]);
+      setTasks(Array.isArray(tasks) ? [...tasks, res.data] : [res.data]);
       toast.success("タスクを追加しました");
+      return res.data;
     } catch {
       toast.error("追加に失敗しました");
+      return null;
+    }
+  };
+
+  const handleGenerateSubtasks = async (taskTitle: string) => {
+    if (!taskTitle.trim()) {
+      toast.error("タスク名を入力してください");
+      return;
+    }
+
+    try {
+      // 一時的なタスクを作成（サブタスク生成用）
+      const tempTask = {
+        title: taskTitle,
+        description: "",
+        completed: false,
+        dueDate: null,
+        priority: "medium" as const,
+      };
+
+      // ログイン状態に応じてエンドポイントを選択
+      const url = token ? "/api/tasks" : "/api/tasks/public";
+      
+      console.log("Creating task at:", url, tempTask);
+      
+      let createdTask;
+      try {
+        const res = await api.post(url, tempTask);
+        createdTask = res.data;
+        console.log("Task created:", createdTask);
+      } catch (taskError: any) {
+        console.error("Failed to create task:", taskError);
+        console.error("Error details:", {
+          status: taskError.response?.status,
+          statusText: taskError.response?.statusText,
+          data: taskError.response?.data,
+          message: taskError.message,
+        });
+        
+        let errorMessage = "タスクの作成に失敗しました";
+        if (taskError.response?.status === 404) {
+          errorMessage = "バックエンドサーバーが起動していないか、エンドポイントが見つかりません。バックエンドサーバーを起動してください。";
+        } else if (taskError.response?.status === 401) {
+          errorMessage = "認証が必要です。ログインしてください。";
+        } else if (taskError.response?.data?.message) {
+          errorMessage = taskError.response.data.message;
+        } else if (taskError.message) {
+          errorMessage = taskError.message;
+        }
+        
+        toast.error(errorMessage);
+        return;
+      }
+
+      if (!createdTask || !createdTask.id) {
+        toast.error("タスクの作成に失敗しました（IDが取得できませんでした）");
+        return;
+      }
+
+      // サブタスクを生成（ログイン不要）
+      console.log("Generating subtasks for task:", createdTask.id);
+      try {
+        await generateSubtasks(createdTask.id, {
+          taskTitle: taskTitle,
+        });
+        console.log("Subtasks generated successfully");
+      } catch (subtaskError: any) {
+        console.error("Failed to generate subtasks:", subtaskError);
+        console.error("Subtask error details:", {
+          status: subtaskError.response?.status,
+          statusText: subtaskError.response?.statusText,
+          data: subtaskError.response?.data,
+          message: subtaskError.message,
+        });
+        
+        let errorMessage = "サブタスクの生成に失敗しました";
+        if (subtaskError.response?.status === 404) {
+          errorMessage = "サブタスク生成エンドポイントが見つかりません";
+        } else if (subtaskError.response?.data?.message) {
+          errorMessage = subtaskError.response.data.message;
+        } else if (subtaskError.message) {
+          errorMessage = subtaskError.message;
+        }
+        
+        toast.error(errorMessage);
+        return;
+      }
+
+      // タスクリストを更新
+      await fetchTasks();
+      
+      toast.success("サブタスクを生成しました！");
+    } catch (error: any) {
+      console.error("Unexpected error in handleGenerateSubtasks:", error);
+      toast.error(
+        error.response?.data?.message || error.message || "サブタスクの生成に失敗しました"
+      );
     }
   };
 
@@ -70,7 +177,7 @@ export function useTasks() {
 
       await api.delete(url);
 
-      setTasks(tasks.filter((t) => t.id !== id));
+      setTasks(Array.isArray(tasks) ? tasks.filter((t) => t.id !== id) : []);
       toast.success("削除しました");
     } catch {
       toast.error("削除に失敗しました");
@@ -153,19 +260,25 @@ export function useTasks() {
     return list;
   };
 
-  const filteredTasks = sortTasks(
-    tasks.filter((task) => {
+  const filteredTasks = (() => {
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      return [];
+    }
+    const filtered = tasks.filter((task) => {
       if (filter === "completed") return task.completed;
       if (filter === "active") return !task.completed;
       return true;
-    })
-  );
+    });
+    return sortTasks(filtered);
+  })();
 
   // ==============================
   // 進捗率
   // ==============================
-  const completedCount = tasks.filter((t) => t.completed).length;
-  const totalCount = tasks.length;
+  const completedCount = Array.isArray(tasks) 
+    ? tasks.filter((t) => t.completed).length 
+    : 0;
+  const totalCount = Array.isArray(tasks) ? tasks.length : 0;
   const progress =
     totalCount > 0
       ? Math.round((completedCount / totalCount) * 100)
@@ -206,5 +319,7 @@ export function useTasks() {
 
     openModal,
     closeModal,
+
+    handleGenerateSubtasks,
   };
 }

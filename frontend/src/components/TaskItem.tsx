@@ -1,6 +1,7 @@
 import React from "react";
 import type { Task, Priority, EditData } from "../types/task";
-import { Trash2 } from "lucide-react"; // ← アイコン追加（自動で入る）
+import { Trash2 } from "lucide-react";
+import SubtaskList from "./SubtaskList";
 
 type Props = {
   task: Task;
@@ -98,51 +99,54 @@ export default function TaskItem({
         // ------------------
         // 通常モード
         // ------------------
-        <div
-          className="flex items-center justify-between w-full cursor-pointer"
-          onClick={() => onClickTask(task)}
-        >
-          <div className="flex items-center gap-3">
-            {/* チェックボックスにアニメーション */}
-            <input
-              type="checkbox"
-              checked={task.completed}
-              onChange={() => onToggleComplete(task)}
-              className="w-5 h-5 accent-blue-500 transition-transform duration-150 hover:scale-110"
-            />
-
-            <div className="flex flex-col">
-              <p className="text-lg font-medium">{task.title}</p>
-
-              {task.dueDate && (
-                <p className={`text-sm ${getDueDateColor(task.dueDate)}`}>
-                  締切: {task.dueDate}
-                </p>
-              )}
-
-              {task.priority && (
-                <p className={`text-sm ${priorityColor[task.priority]}`}>
-                  優先度: {task.priority.toUpperCase()}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* 削除アイコン（ホバーで赤く） */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // ← 行全体クリックの邪魔をしない
-              onDelete(task.id);
-            }}
-            className="
-              p-2 rounded-full transition-all
-              hover:bg-red-100 hover:text-red-600
-              active:scale-90
-            "
+        <>
+          <div
+            className="flex items-center justify-between w-full cursor-pointer"
+            onClick={() => onClickTask(task)}
           >
-            <Trash2 size={18} />
-          </button>
-        </div>
+            <div className="flex items-center gap-3">
+              {/* チェックボックスにアニメーション */}
+              <input
+                type="checkbox"
+                checked={task.completed}
+                onChange={() => onToggleComplete(task)}
+                className="w-5 h-5 accent-blue-500 transition-transform duration-150 hover:scale-110"
+              />
+
+              <div className="flex flex-col">
+                <p className="text-lg font-medium">{task.title}</p>
+
+                {task.dueDate && (
+                  <p className={`text-sm ${getDueDateColor(task.dueDate)}`}>
+                    締切: {task.dueDate}
+                  </p>
+                )}
+
+                {task.priority && (
+                  <p className={`text-sm ${priorityColor[task.priority]}`}>
+                    優先度: {task.priority.toUpperCase()}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* 削除アイコン（ホバーで赤く） */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // ← 行全体クリックの邪魔をしない
+                onDelete(task.id);
+              }}
+              className="
+                p-2 rounded-full transition-all
+                hover:bg-red-100 hover:text-red-600
+                active:scale-90
+              "
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+          <SubtaskList taskId={task.id} />
+        </>
       )}
     </li>
   );
