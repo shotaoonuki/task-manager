@@ -2,6 +2,7 @@ package com.example.taskapp.controller;
 
 import com.example.taskapp.entity.Task;
 import com.example.taskapp.entity.User;
+import com.example.taskapp.repository.SubtaskRepository;
 import com.example.taskapp.repository.TaskRepository;
 import com.example.taskapp.repository.UserRepository;
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.example.taskapp.entity.Subtask;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -19,11 +21,14 @@ public class TaskController {
 
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
+    private final SubtaskRepository subtaskRepository;
 
     public TaskController(TaskRepository taskRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          SubtaskRepository subtaskRepository) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
+        this.subtaskRepository = subtaskRepository;
     }
 
     // ==========================================
@@ -64,12 +69,31 @@ public class TaskController {
 
     @DeleteMapping("/{id}")
     public void deleteTask(@PathVariable Long id) {
-        User user = getCurrentUser();
+        try {
+            User user = getCurrentUser();
 
-        Task task = taskRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new RuntimeException("Task not found or no permission"));
+            Task task = taskRepository.findByIdAndUser(id, user)
+                    .orElseThrow(() -> new RuntimeException("Task not found or no permission"));
 
-        taskRepository.delete(task);
+            // サブタスクを先に削除（明示的にリストを取得してから削除）
+            try {
+                List<Subtask> subtasks = subtaskRepository.findByTask(task);
+                if (subtasks != null && !subtasks.isEmpty()) {
+                    subtaskRepository.deleteAll(subtasks);
+                }
+            } catch (Exception e) {
+                // サブタスクが存在しない場合でも続行
+                System.err.println("Warning: Failed to delete subtasks: " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            // その後、タスクを削除
+            taskRepository.delete(task);
+        } catch (Exception e) {
+            System.err.println("Error deleting task: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("タスクの削除に失敗しました: " + e.getMessage(), e);
+        }
     }
 
     // ==========================================
@@ -104,10 +128,29 @@ public class TaskController {
 
     @DeleteMapping("/public/{id}")
     public void deletePublicTask(@PathVariable Long id) {
-        Task task = taskRepository.findByIdAndUser(id, null)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+        try {
+            Task task = taskRepository.findByIdAndUser(id, null)
+                    .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        taskRepository.delete(task);
+            // サブタスクを先に削除（明示的にリストを取得してから削除）
+            try {
+                List<com.example.taskapp.entity.Subtask> subtasks = subtaskRepository.findByTask(task);
+                if (subtasks != null && !subtasks.isEmpty()) {
+                    subtaskRepository.deleteAll(subtasks);
+                }
+            } catch (Exception e) {
+                // サブタスクが存在しない場合でも続行
+                System.err.println("Warning: Failed to delete subtasks: " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            // その後、タスクを削除
+            taskRepository.delete(task);
+        } catch (Exception e) {
+            System.err.println("Error deleting task: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("タスクの削除に失敗しました: " + e.getMessage(), e);
+        }
     }
 
     // ==========================================
