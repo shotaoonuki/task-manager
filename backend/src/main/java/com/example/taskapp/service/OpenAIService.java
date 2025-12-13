@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,30 +24,25 @@ public class OpenAIService {
     private String apiKey;
 
     public OpenAIService() {
-        this.webClient = WebClient.builder()
-                .baseUrl("https://api.openai.com/v1")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .build();
+        this.webClient = WebClient.builder().baseUrl("https://api.openai.com/v1")
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).build();
         this.objectMapper = new ObjectMapper();
     }
 
     public List<String> generateSubtasks(String taskTitle, String taskDescription) {
         if (apiKey == null || apiKey.isEmpty()) {
             System.err.println("警告: OpenAI API keyが設定されていません。デフォルトのサブタスクを生成します。");
-            throw new RuntimeException("OpenAI API key is not configured. Please set OPENAI_API_KEY environment variable.");
+            throw new RuntimeException(
+                    "OpenAI API key is not configured. Please set OPENAI_API_KEY environment variable.");
         }
 
         String prompt = String.format(
-            "以下のタスクに対して、実行可能なサブタスクを3つ提案してください。\n\n" +
-            "タスク名: %s\n" +
-            "%s\n\n" +
-            "サブタスクは簡潔で具体的にしてください。JSON配列形式で返してください。\n" +
-            "例: [\"サブタスク1\", \"サブタスク2\", \"サブタスク3\"]",
-            taskTitle,
-            taskDescription != null && !taskDescription.isEmpty() 
-                ? "説明: " + taskDescription 
-                : ""
-        );
+                "以下のタスクに対して、実行可能なサブタスクを3つ提案してください。\n\n" + "タスク名: %s\n" + "%s\n\n"
+                        + "サブタスクは簡潔で具体的にしてください。JSON配列形式で返してください。\n"
+                        + "例: [\"サブタスク1\", \"サブタスク2\", \"サブタスク3\"]",
+                taskTitle,
+                taskDescription != null && !taskDescription.isEmpty() ? "説明: " + taskDescription
+                        : "");
 
         // Jacksonを使ってJSONリクエストボディを構築
         ObjectNode requestBody = objectMapper.createObjectNode();
@@ -55,10 +51,11 @@ public class OpenAIService {
         requestBody.put("max_tokens", 200);
 
         ArrayNode messages = objectMapper.createArrayNode();
-        
+
         ObjectNode systemMessage = objectMapper.createObjectNode();
         systemMessage.put("role", "system");
-        systemMessage.put("content", "あなたはタスク管理の専門家です。与えられたタスクから、実行可能なサブタスクを3つ提案してください。JSON配列形式で返してください。例: [\"サブタスク1\", \"サブタスク2\", \"サブタスク3\"]");
+        systemMessage.put("content",
+                "あなたはタスク管理の専門家です。与えられたタスクから、実行可能なサブタスクを3つ提案してください。JSON配列形式で返してください。例: [\"サブタスク1\", \"サブタスク2\", \"サブタスク3\"]");
         messages.add(systemMessage);
 
         ObjectNode userMessage = objectMapper.createObjectNode();
@@ -70,21 +67,13 @@ public class OpenAIService {
 
         try {
             String requestBodyJson = objectMapper.writeValueAsString(requestBody);
-            
-            String response = webClient.post()
-                    .uri("/chat/completions")
+
+            String response = webClient.post().uri("/chat/completions")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .bodyValue(requestBodyJson)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
+                    .bodyValue(requestBodyJson).retrieve().bodyToMono(String.class).block();
 
             JsonNode jsonNode = objectMapper.readTree(response);
-            String content = jsonNode.get("choices")
-                    .get(0)
-                    .get("message")
-                    .get("content")
-                    .asText();
+            String content = jsonNode.get("choices").get(0).get("message").get("content").asText();
 
             // JSON配列をパース
             content = content.trim();
@@ -114,5 +103,32 @@ public class OpenAIService {
             throw new RuntimeException("Failed to generate subtasks: " + e.getMessage(), e);
         }
     }
+
+    public String chat(String prompt) {
+        try {
+            ObjectNode body = objectMapper.createObjectNode();
+            body.put("model", "gpt-4o-mini");
+            body.put("temperature", 0.2);
+
+            ArrayNode messages = objectMapper.createArrayNode();
+            messages.add(objectMapper.createObjectNode().put("role", "system").put("content",
+                    "You return only strict JSON."));
+            messages.add(
+                    objectMapper.createObjectNode().put("role", "user").put("content", prompt));
+            body.set("messages", messages);
+
+            String res = webClient.post().uri("/chat/completions")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey).bodyValue(body)
+                    .retrieve().bodyToMono(String.class).block();
+
+            return objectMapper.readTree(res).get("choices").get(0).get("message").get("content")
+                    .asText();
+
+        } catch (Exception e) {
+            throw new RuntimeException("OpenAI chat failed", e);
+        }
+    }
+
+
 }
 

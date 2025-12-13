@@ -13,13 +13,18 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;           // タスク名
-    private String description;     // 詳細
-    private boolean completed;      // 完了フラグ
+    private String title; // タスク名
+    private String description; // 詳細
+    private boolean completed; // 完了フラグ
     private LocalDateTime createdAt; // 作成日時
 
-    private LocalDate dueDate;   // 締切日
-    private String priority;     // 優先度（low, medium, high）
+    private LocalDate dueDate; // 締切日
+    private String priority; // 優先度（low, medium, high）
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskState state;
+    // ★ここを追加！（pending / executing / done）
 
     // 🔥 ユーザーと紐づける（ここが重要！）
     @ManyToOne(fetch = FetchType.LAZY)

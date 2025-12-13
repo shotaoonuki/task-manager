@@ -19,3 +19,25 @@ export async function updateTask(id: number, task: Partial<Task>): Promise<Task>
   const res = await api.put(`/api/tasks/${id}`, task);
   return res.data;
 }
+
+// AI判断レスポンス型
+export interface TaskAiDecisionResponse {
+  nextState: "PENDING" | "EXECUTING" | "DONE";
+  reason: string;
+}
+
+// AIに状態判断を依頼
+export async function getTaskAiDecision(
+  taskId: number
+): Promise<TaskAiDecisionResponse> {
+  const res = await api.post(`/api/tasks/${taskId}/ai/decision`);
+  return res.data;
+}
+export async function updateTaskState(
+  taskId: number,
+  state: "PENDING" | "EXECUTING" | "DONE"
+): Promise<Task> {
+  const res = await api.put(`/api/tasks/${taskId}/state`, { state });
+  return res.data;
+}
+

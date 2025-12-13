@@ -199,6 +199,7 @@ export default function TaskList() {
             onClickTask={handleClickTask}
             priorityColor={priorityColor}
             getDueDateColor={getDueDateColor}
+            onRefreshTasks={fetchTasks} // ★ 追加
           />
         ))}
       </ul>
