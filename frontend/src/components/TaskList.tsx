@@ -215,6 +215,7 @@ export default function TaskList() {
           priorityColor={priorityColor}
           getDueDateColor={getDueDateColor}
         />
+
       )}
     </div>
   );

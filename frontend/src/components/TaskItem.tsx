@@ -87,9 +87,6 @@ export default function TaskItem({
     DONE: "bg-green-100 text-green-700",
   };
 
-
-
-
   return (
     <li
       className={`
@@ -240,9 +237,9 @@ export default function TaskItem({
               </div>
             )}
 
-            {/* ★ 追加 */}
             <AiDecisionLogList taskId={task.id} />
           </div>
+
 
 
           <SubtaskList taskId={task.id} />
