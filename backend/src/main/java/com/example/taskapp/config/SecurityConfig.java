@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -45,11 +46,19 @@ public class SecurityConfig {
                         // subtasks（ログイン不要）
                         .requestMatchers("/api/tasks/*/subtasks/**").permitAll()
 
+                        // ★ AI判断（これを必ず追加）
+                        .requestMatchers("/api/tasks/*/ai/decision").permitAll()
+
                         // auth
                         .requestMatchers("/auth/**").permitAll()
 
                         // その他 API
                         .requestMatchers("/api/**").authenticated()
+
+                        .requestMatchers("/api/tasks/*/state").permitAll()
+
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/*/state").permitAll()
+
 
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter,

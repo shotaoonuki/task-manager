@@ -26,17 +26,31 @@ public class TaskStateController {
     @PutMapping("/{taskId}/state")
     public Task updateState(@PathVariable Long taskId,
             @RequestBody UpdateTaskStateRequest request) {
-        User user = getCurrentUserOrNull();
 
-        Task task = user != null
-                ? taskRepository.findByIdAndUser(taskId, user)
-                        .orElseThrow(() -> new RuntimeException("Task not found or no permission"))
-                : taskRepository.findByIdAndUser(taskId, null)
-                        .orElseThrow(() -> new RuntimeException("Task not found"));
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        Task task;
+
+        if (auth != null && auth.isAuthenticated()
+                && !"anonymousUser".equals(auth.getPrincipal())) {
+
+            User user = userRepository.findByEmail(auth.getName())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            task = taskRepository.findByIdAndUser(taskId, user)
+                    .orElseThrow(() -> new RuntimeException("Task not found or no permission"));
+
+        } else {
+            // 🔥 public タスク用
+            task = taskRepository.findById(taskId)
+                    .orElseThrow(() -> new RuntimeException("Task not found"));
+        }
 
         task.setState(request.getState());
         return taskRepository.save(task);
     }
+
+
 
     private User getCurrentUserOrNull() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

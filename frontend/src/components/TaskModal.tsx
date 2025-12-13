@@ -66,10 +66,6 @@ export default function TaskModal({
         className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full z-50"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 🔥 確認表示はここ */}
-        <div className="mb-2 text-red-500 font-bold">
-          🔥 THIS IS NEW TASK MODAL 🔥
-        </div>
 
         <h2 className="text-2xl font-bold mb-2">{task.title}</h2>
 
