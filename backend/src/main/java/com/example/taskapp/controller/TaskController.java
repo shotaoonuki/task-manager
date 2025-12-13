@@ -181,15 +181,6 @@ public class TaskController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    @PostMapping("/{id}/ai/decision")
-    public TaskAiDecisionResponse decideTaskState(@PathVariable Long id) {
-        User user = getCurrentUser();
-        Task task = taskRepository.findByIdAndUser(id, user)
-                .orElseThrow(() -> new RuntimeException("Task not found or no permission"));
-
-        return taskAiDecisionService.decide(task);
-    }
-
     @PutMapping("/{id}/state")
     public Task updateState(@PathVariable Long id, @RequestBody UpdateStateRequest req) {
         User user = getCurrentUser();

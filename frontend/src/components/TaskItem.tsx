@@ -4,7 +4,7 @@ import SubtaskList from "./SubtaskList";
 import { useState } from "react";
 import { getTaskAiDecision } from "../api/taskApi";
 import { updateTaskState } from "../api/taskApi";
-
+import AiDecisionLogList from "./AiDecisionLogList";
 
 
 type Props = {
@@ -231,7 +231,6 @@ export default function TaskItem({
                   {aiDecision.reason}
                 </div>
 
-                {/* ★ これを追加 */}
                 <button
                   onClick={onApplyAi}
                   className="text-xs px-2 py-1 border rounded hover:bg-blue-50"
@@ -241,7 +240,10 @@ export default function TaskItem({
               </div>
             )}
 
+            {/* ★ 追加 */}
+            <AiDecisionLogList taskId={task.id} />
           </div>
+
 
           <SubtaskList taskId={task.id} />
 

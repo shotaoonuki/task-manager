@@ -41,3 +41,21 @@ export async function updateTaskState(
   return res.data;
 }
 
+// AI判断ログ型
+export interface AiDecisionLog {
+  id: number;
+  taskId: number;
+  suggestedState: "PENDING" | "EXECUTING" | "DONE";
+  reason: string;
+  createdAt: string;
+}
+
+// AI判断ログ取得
+export async function getTaskAiLogs(
+  taskId: number
+): Promise<AiDecisionLog[]> {
+  const res = await api.get(`/api/tasks/${taskId}/ai/logs`);
+  return res.data;
+}
+
+
