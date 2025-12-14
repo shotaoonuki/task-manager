@@ -15,7 +15,14 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-center"
+        toastOptions={{ duration: 4000 }}
+      />
+
+
+
+
 
       <Navbar
         isAuthed={isAuthed}
