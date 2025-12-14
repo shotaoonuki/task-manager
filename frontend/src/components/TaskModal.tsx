@@ -1,13 +1,13 @@
 import React from "react";
-import type { Task, Priority } from "../types/task";
+import type { TaskItem, Priority } from "../types/task";
 import { useState } from "react";
 import { getTaskAiDecision, updateTaskState } from "../api/taskApi";
 
 type Props = {
-  task: Task;
+  task: TaskItem;
   onClose: () => void;
-  onToggleComplete: (task: Task) => void;
-  onEdit: (task: Task) => void;
+  onToggleComplete: (task: TaskItem) => void;
+  onEdit: (task: TaskItem) => void;
   onDelete: (id: number) => void;
   priorityColor: Record<Priority, string>;
   getDueDateColor: (dueDate: string | null) => string;

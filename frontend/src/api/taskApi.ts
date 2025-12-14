@@ -1,5 +1,5 @@
 import api from "./axiosInstance";
-import type { Task } from "../types/task";
+import type { TaskItem } from "../types/task";
 
 export async function getTasks(): Promise<Task[]> {
   const res = await api.get("/api/tasks");

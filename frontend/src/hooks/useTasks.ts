@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import api from "../api/axiosInstance";
-import type { Task, EditData } from "../types/task";
+import type { TaskItem, TaskState, EditData, Priority } from "../types/task";
 import { generateSubtasks } from "../api/subtaskApi";
 import toast from "react-hot-toast";
 
 export function useTasks() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [filter, setFilter] =
     useState<"all" | "active" | "completed">("all");
   const [sortOption, setSortOption] =
     useState<"default" | "dueDate" | "priority">("default");
 
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editData, setEditData] = useState<EditData>({
@@ -31,6 +31,8 @@ export function useTasks() {
   useEffect(() => {
     fetchTasks();
   }, [token]);
+
+
 
   // ==============================
   // API 呼び分け（★★★修正ポイント★★★）
@@ -59,7 +61,7 @@ export function useTasks() {
     }
   };
 
-  const handleAdd = async (task: Partial<Task>) => {
+  const handleAdd = async (task: Partial<TaskItem>) => {
     try {
       const url = token ? "/api/tasks" : "/api/tasks/public";
       const res = await api.post(url, task);
@@ -91,9 +93,9 @@ export function useTasks() {
 
       // ログイン状態に応じてエンドポイントを選択
       const url = token ? "/api/tasks" : "/api/tasks/public";
-      
+
       console.log("Creating task at:", url, tempTask);
-      
+
       let createdTask;
       try {
         const res = await api.post(url, tempTask);
@@ -107,7 +109,7 @@ export function useTasks() {
           data: taskError.response?.data,
           message: taskError.message,
         });
-        
+
         let errorMessage = "タスクの作成に失敗しました";
         if (taskError.response?.status === 404) {
           errorMessage = "バックエンドサーバーが起動していないか、エンドポイントが見つかりません。バックエンドサーバーを起動してください。";
@@ -118,7 +120,7 @@ export function useTasks() {
         } else if (taskError.message) {
           errorMessage = taskError.message;
         }
-        
+
         toast.error(errorMessage);
         return;
       }
@@ -143,7 +145,7 @@ export function useTasks() {
           data: subtaskError.response?.data,
           message: subtaskError.message,
         });
-        
+
         let errorMessage = "サブタスクの生成に失敗しました";
         if (subtaskError.response?.status === 404) {
           errorMessage = "サブタスク生成エンドポイントが見つかりません";
@@ -152,14 +154,14 @@ export function useTasks() {
         } else if (subtaskError.message) {
           errorMessage = subtaskError.message;
         }
-        
+
         toast.error(errorMessage);
         return;
       }
 
       // タスクリストを更新
       await fetchTasks();
-      
+
       toast.success("サブタスクを生成しました！");
     } catch (error: any) {
       console.error("Unexpected error in handleGenerateSubtasks:", error);
@@ -184,7 +186,7 @@ export function useTasks() {
     }
   };
 
-  const handleToggleComplete = async (task: Task) => {
+  const handleToggleComplete = async (task: TaskItem) => {
     const updated = { ...task, completed: !task.completed };
 
     try {
@@ -203,7 +205,7 @@ export function useTasks() {
   // ==============================
   // 編集機能
   // ==============================
-  const startEditing = (task: Task) => {
+  const startEditing = (task: TaskItem) => {
     setEditingId(task.id);
     setEditData({
       title: task.title,
@@ -212,7 +214,7 @@ export function useTasks() {
     });
   };
 
-  const saveEdit = async (task: Task) => {
+  const saveEdit = async (task: TaskItem) => {
     try {
       const url = token
         ? `/api/tasks/${task.id}`
@@ -236,47 +238,94 @@ export function useTasks() {
   // ==============================
   // モーダル
   // ==============================
-  const openModal = (task: Task) => setSelectedTask(task);
+  const openModal = (task: TaskItem) => setSelectedTask(task);
   const closeModal = () => setSelectedTask(null);
 
   // ==============================
   // ソート & フィルタ
   // ==============================
-  const sortTasks = (list: Task[]) => {
-    if (sortOption === "dueDate") {
-      return [...list].sort((a, b) => {
-        if (!a.dueDate && !b.dueDate) return 0;
-        if (!a.dueDate) return 1;
-        if (!b.dueDate) return -1;
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      });
-    }
-
-    if (sortOption === "priority") {
-      const order = { high: 1, medium: 2, low: 3 };
-      return [...list].sort((a, b) => order[a.priority] - order[b.priority]);
-    }
-
-    return list;
+  const stateOrder: Record<TaskState, number> = {
+    EXECUTING: 0,
+    PENDING: 1,
+    DONE: 2,
   };
 
-  const filteredTasks = (() => {
+  const priorityOrder: Record<Priority, number> = {
+    high: 0,
+    medium: 1,
+    low: 2,
+  };
+
+  const sortTasks = (list: TaskItem[]) => {
+    console.log("🧪 sortTasks run", { sortOption, count: list.length });
+
+    console.table(
+      list.map((t) => ({
+        id: t.id,
+        state: t.state,
+        dueDate: t.dueDate,
+        priority: t.priority,
+        createdAt: t.createdAt,
+      }))
+    );
+
+    return [...list].sort((a, b) => {
+      const stateDiff = stateOrder[a.state] - stateOrder[b.state];
+      if (stateDiff !== 0) return stateDiff;
+
+      if (sortOption === "dueDate") {
+        if (a.dueDate && b.dueDate) {
+          const diff =
+            new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+          if (diff !== 0) return diff;
+        }
+        if (a.dueDate && !b.dueDate) return -1;
+        if (!a.dueDate && b.dueDate) return 1;
+      }
+
+      if (sortOption === "priority") {
+        const diff = priorityOrder[a.priority] - priorityOrder[b.priority];
+        if (diff !== 0) return diff;
+      }
+
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+  };
+
+
+
+
+  const filteredTasks = useMemo(() => {
     if (!Array.isArray(tasks) || tasks.length === 0) {
       return [];
     }
+
     const filtered = tasks.filter((task) => {
       if (filter === "completed") return task.completed;
       if (filter === "active") return !task.completed;
       return true;
     });
+
     return sortTasks(filtered);
-  })();
+  }, [tasks, filter, sortOption]);
+
+  // const filteredTasks = (() => {
+  //   if (!Array.isArray(tasks) || tasks.length === 0) {
+  //     return [];
+  //   }
+  //   const filtered = tasks.filter((task) => {
+  //     if (filter === "completed") return task.completed;
+  //     if (filter === "active") return !task.completed;
+  //     return true;
+  //   });
+  //   return sortTasks(filtered);
+  // })();
 
   // ==============================
   // 進捗率
   // ==============================
-  const completedCount = Array.isArray(tasks) 
-    ? tasks.filter((t) => t.completed).length 
+  const completedCount = Array.isArray(tasks)
+    ? tasks.filter((t) => t.completed).length
     : 0;
   const totalCount = Array.isArray(tasks) ? tasks.length : 0;
   const progress =
