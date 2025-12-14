@@ -3,7 +3,11 @@ import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-export default function SignUp() {
+type Props = {
+  setIsAuthed: (v: boolean) => void;
+};
+
+export default function SignUp({ setIsAuthed }: Props) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,13 +17,14 @@ export default function SignUp() {
 
     try {
       const res = await api.post("/auth/register", { email, password });
+
       localStorage.setItem("token", res.data.token);
+      setIsAuthed(true); // ★ ここで state 更新
 
       toast.success("登録が完了しました！");
       navigate("/");
     } catch (err) {
       toast.error("登録に失敗しました");
-      console.error(err);
     }
   };
 
