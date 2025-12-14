@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.taskapp.dto.TaskAiDecisionResponse;
 import com.example.taskapp.dto.TaskAiDecisionOpenAiResponse;
 import com.example.taskapp.repository.AiDecisionLogRepository;
+import java.util.List;
 
 
 
@@ -92,4 +93,9 @@ public class TaskAiDecisionService {
         }
         return res;
     }
+
+    public List<AiDecisionLog> getLogsByTaskId(Long taskId) {
+        return aiDecisionLogRepository.findByTaskIdOrderByCreatedAtDesc(taskId);
+    }
+
 }

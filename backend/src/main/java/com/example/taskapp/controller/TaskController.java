@@ -19,6 +19,7 @@ import com.example.taskapp.service.TaskAiDecisionService;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.example.taskapp.dto.CreateTaskRequest;
+import com.example.taskapp.entity.AiDecisionLog;
 import com.example.taskapp.entity.Subtask;
 
 @RestController
@@ -177,6 +178,11 @@ public class TaskController {
         }
 
         return taskRepository.save(task);
+    }
+
+    @GetMapping("/public/{taskId}/ai/logs")
+    public List<AiDecisionLog> getPublicAiLogs(@PathVariable Long taskId) {
+        return taskAiDecisionService.getLogsByTaskId(taskId);
     }
 
 

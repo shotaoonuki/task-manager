@@ -69,34 +69,45 @@ export default function TaskModal({
 
         <h2 className="text-2xl font-bold mb-2">{task.title}</h2>
 
-        {/* 🤖 AI判断：ここ */}
-        <div className="my-4 p-3 border-2 border-blue-300 rounded bg-blue-50">
+        {/* 🤖 AI判断 */}
+        {task.state !== "DONE" && (
           <button
             onClick={onAskAi}
             disabled={loadingAi}
-            className="text-sm px-3 py-1 border rounded hover:bg-white"
+            className="
+      mb-4
+      flex items-center gap-2
+      px-4 py-2
+      rounded-lg
+      border border-blue-300
+      text-blue-600
+      hover:bg-blue-50
+      transition
+      disabled:opacity-50
+    "
           >
-            🤖 AIに相談
+            AI判定
           </button>
+        )}
 
-          {aiDecision && (
-            <div className="mt-2 text-sm">
-              <div className="font-semibold">
-                次の状態：{aiDecision.nextState}
-              </div>
-              <div className="text-gray-600 mb-2">
-                {aiDecision.reason}
-              </div>
-
-              <button
-                onClick={onApplyAi}
-                className="text-xs px-2 py-1 border rounded hover:bg-blue-100"
-              >
-                この提案を反映
-              </button>
+        {aiDecision && (
+          <div className="mb-4 p-3 rounded-lg bg-slate-50 border">
+            <div className="font-semibold text-sm">
+              AIの提案：{aiDecision.nextState}
             </div>
-          )}
-        </div>
+            <div className="text-xs text-gray-600 mt-1">
+              {aiDecision.reason}
+            </div>
+
+            <button
+              onClick={onApplyAi}
+              className="mt-2 text-xs px-3 py-1 border rounded hover:bg-blue-50"
+            >
+              この提案を反映
+            </button>
+          </div>
+        )}
+
 
         <p className="text-gray-600 mb-2">
           締切：{" "}

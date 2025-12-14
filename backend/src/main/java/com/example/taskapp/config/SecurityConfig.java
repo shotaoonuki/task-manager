@@ -61,6 +61,9 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.PUT, "/api/tasks/public/**").permitAll()
 
+                        // ★ AI判断ログ（public）
+                        .requestMatchers("/api/tasks/public/*/ai/logs").permitAll()
+
 
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter,

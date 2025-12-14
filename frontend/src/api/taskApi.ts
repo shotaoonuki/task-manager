@@ -1,12 +1,12 @@
 import api from "./axiosInstance";
 import type { TaskItem } from "../types/task";
 
-export async function getTasks(): Promise<Task[]> {
+export async function getTasks(): Promise<TaskItem[]> {
   const res = await api.get("/api/tasks");
   return res.data;
 }
 
-export async function addTask(task: Partial<Task>): Promise<Task> {
+export async function addTask(task: Partial<TaskItem>): Promise<TaskItem> {
   const res = await api.post("/api/tasks", task);
   return res.data;
 }
@@ -15,7 +15,7 @@ export async function deleteTask(id: number): Promise<void> {
   await api.delete(`/api/tasks/${id}`);
 }
 
-export async function updateTask(id: number, task: Partial<Task>): Promise<Task> {
+export async function updateTask(id: number, task: Partial<TaskItem>): Promise<TaskItem> {
   const res = await api.put(`/api/tasks/${id}`, task);
   return res.data;
 }
@@ -36,7 +36,7 @@ export async function getTaskAiDecision(
 export async function updateTaskState(
   taskId: number,
   state: "PENDING" | "EXECUTING" | "DONE"
-): Promise<Task> {
+): Promise<TaskItem> {
 
   const isLoggedIn = !!localStorage.getItem("token");
 
@@ -63,8 +63,15 @@ export interface AiDecisionLog {
 export async function getTaskAiLogs(
   taskId: number
 ): Promise<AiDecisionLog[]> {
-  const res = await api.get(`/api/tasks/${taskId}/ai/logs`);
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  const url = isLoggedIn
+    ? `/api/tasks/${taskId}/ai/logs`
+    : `/api/tasks/public/${taskId}/ai/logs`;
+
+  const res = await api.get(url);
   return res.data;
 }
+
 
 

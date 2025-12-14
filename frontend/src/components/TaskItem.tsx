@@ -1,4 +1,4 @@
-import type { Task, Priority, EditData } from "../types/task";
+import type { TaskItem, Priority, EditData } from "../types/task";
 import { Trash2 } from "lucide-react";
 import SubtaskList from "./SubtaskList";
 import { useState } from "react";
@@ -9,15 +9,15 @@ import toast from "react-hot-toast";
 
 
 type Props = {
-  task: Task;
+  task: TaskItem;
   editingId: number | null;
   editData: EditData;
   onChangeEditData: (data: EditData) => void;
-  onSaveEdit: (task: Task) => void;
+  onSaveEdit: (task: TaskItem) => void;
   onCancelEdit: () => void;
-  onToggleComplete: (task: Task) => void;
+  onToggleComplete: (task: TaskItem) => void;
   onDelete: (id: number) => void;
-  onClickTask: (task: Task) => void;
+  onClickTask: (task: TaskItem) => void;
   priorityColor: Record<Priority, string>;
   getDueDateColor: (dueDate: string | null) => string;
   onRefreshTasks: () => void;
@@ -111,10 +111,11 @@ export default function TaskItem({
         p-4 rounded-xl border
         transition-all duration-200
          ${stateRowStyle[task.state]}
-        ${task.completed
+${task.state === "DONE"
           ? "bg-gray-100/80 text-gray-400 line-through scale-[0.98]"
           : "bg-white hover:shadow-lg hover:-translate-y-0.5"
         }
+
       `}
     >
       {isEditing ? (
@@ -195,11 +196,12 @@ export default function TaskItem({
                 </span>
 
                 {/* 👇 ここに入れる */}
-                {task.state !== "PENDING" && (
+                {task.state === "EXECUTING" && (
                   <div className="text-xs text-gray-400 mb-1">
                     AI判断済み
                   </div>
                 )}
+
 
                 <p className="text-lg font-medium">{task.title}</p>
 
@@ -235,46 +237,47 @@ export default function TaskItem({
           </div>
 
           {/* 🤖 AI判断 */}
-          <div className="mt-3">
-            <button
-              onClick={onAskAi}
-              disabled={loadingAi}
-              className="
-    px-4 py-2
-    rounded-lg
-    border border-blue-300
-    text-blue-600 text-sm font-medium
-    bg-white
-    hover:bg-blue-50
-    transition-colors
-    disabled:opacity-50
-  "
-            >
-              AI判断
-            </button>
+          {task.state !== "DONE" && (
+            <div className="mt-3">
+              <button
+                onClick={onAskAi}
+                disabled={loadingAi}
+                className="
+        px-4 py-2
+        rounded-lg
+        border border-blue-300
+        text-blue-600 text-sm font-medium
+        bg-white
+        hover:bg-blue-50
+        transition-colors
+        disabled:opacity-50
+      "
+              >
+                AI判定
+              </button>
 
+              {aiDecision && (
+                <div className="mt-2 rounded-lg border p-2 bg-slate-50">
+                  <div className="font-semibold text-sm">
+                    AI提案：{aiDecision.nextState}
+                  </div>
+                  <div className="text-xs text-gray-600 mb-2">
+                    {aiDecision.reason}
+                  </div>
 
-
-            {aiDecision && (
-              <div className="mt-2 rounded-lg border p-2 bg-slate-50">
-                <div className="font-semibold text-sm">
-                  AI提案：{aiDecision.nextState}
+                  <button
+                    onClick={onApplyAi}
+                    className="text-xs px-2 py-1 border rounded hover:bg-blue-50"
+                  >
+                    この提案を反映
+                  </button>
                 </div>
-                <div className="text-xs text-gray-600 mb-2">
-                  {aiDecision.reason}
-                </div>
+              )}
 
-                <button
-                  onClick={onApplyAi}
-                  className="text-xs px-2 py-1 border rounded hover:bg-blue-50"
-                >
-                  この提案を反映
-                </button>
-              </div>
-            )}
+              <AiDecisionLogList taskId={task.id} />
+            </div>
+          )}
 
-            <AiDecisionLogList taskId={task.id} />
-          </div>
 
 
 

@@ -3,6 +3,7 @@ import api from "../api/axiosInstance";
 import type { TaskItem, TaskState, EditData, Priority } from "../types/task";
 import { generateSubtasks } from "../api/subtaskApi";
 import toast from "react-hot-toast";
+import { updateTaskState } from "../api/taskApi";
 
 export function useTasks() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -190,15 +191,17 @@ export function useTasks() {
     const updated = { ...task, completed: !task.completed };
 
     try {
-      const url = token
-        ? `/api/tasks/${task.id}`
-        : `/api/tasks/public/${task.id}`;
+      // const url = token
+      //   ? `/api/tasks/${task.id}`
+      //   : `/api/tasks/public/${task.id}`;
 
-      await api.put(url, updated);
+      // await api.put(url, updated);
 
+      await updateTaskState(task.id, "DONE");
+      toast.success("タスクを完了にしました");
       fetchTasks();
     } catch {
-      toast.error("更新に失敗しました");
+      toast.error("完了に失敗しました");
     }
   };
 
@@ -301,8 +304,8 @@ export function useTasks() {
     }
 
     const filtered = tasks.filter((task) => {
-      if (filter === "completed") return task.completed;
-      if (filter === "active") return !task.completed;
+      if (filter === "completed") return task.state === "DONE";
+      if (filter === "active") return task.state !== "DONE";
       return true;
     });
 
@@ -325,7 +328,7 @@ export function useTasks() {
   // 進捗率
   // ==============================
   const completedCount = Array.isArray(tasks)
-    ? tasks.filter((t) => t.completed).length
+    ? tasks.filter((t) => t.state === "DONE").length
     : 0;
   const totalCount = Array.isArray(tasks) ? tasks.length : 0;
   const progress =
