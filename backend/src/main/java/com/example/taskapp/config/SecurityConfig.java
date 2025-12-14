@@ -3,6 +3,7 @@ package com.example.taskapp.config;
 import com.example.taskapp.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -10,7 +11,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
+
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -26,41 +29,45 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
-                    corsConfig.addAllowedOrigin("http://localhost:5173");
-                    corsConfig.addAllowedOrigin("https://task-manager-7k8.pages.dev");
-                    corsConfig.addAllowedOrigin("https://task-manager-dev.pages.dev");
-                    corsConfig.setAllowCredentials(true);
-                    corsConfig.addAllowedHeader("*");
-                    corsConfig.addAllowedMethod("*");
-                    return corsConfig;
-                }))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(request -> {
+            var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+            corsConfig.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173",
+                    "https://task-manager-7k8.pages.dev", "https://task-manager-dev.pages.dev"));
+            corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            corsConfig.setAllowedHeaders(List.of("*"));
+            corsConfig.setAllowCredentials(true);
+            return corsConfig;
+        })).sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                
-                        // ① 最優先：public API を一番上に持ってくる
+
+                        // public API
                         .requestMatchers("/api/tasks/public/**").permitAll()
-                        
-                        // ② サブタスク関連エンドポイント（ログイン不要）
-                        // パターンを具体的に指定して、publicタスクのサブタスクも含める
-                        .requestMatchers("/api/tasks/*/subtasks/generate").permitAll()
-                        .requestMatchers("/api/tasks/*/subtasks").permitAll()
-                        .requestMatchers("/api/tasks/*/subtasks/*").permitAll()
-                                
-                        // ③ その次に auth などの公開API
+
+                        // subtasks（ログイン不要）
+                        .requestMatchers("/api/tasks/*/subtasks/**").permitAll()
+
+                        // ★ AI判断（これを必ず追加）
+                        .requestMatchers("/api/tasks/*/ai/decision").permitAll()
+
+                        // auth
                         .requestMatchers("/auth/**").permitAll()
-                                
-                        // ④ 最後に /api/** を認証必須にする
+
+                        // その他 API
                         .requestMatchers("/api/**").authenticated()
-                                
-                        .anyRequest().permitAll()
-                )
-                
-                // JWTフィルタを追加
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+                        .requestMatchers("/api/tasks/*/state").permitAll()
+
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/*/state").permitAll()
+
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/public/**").permitAll()
+
+                        // ★ AI判断ログ（public）
+                        .requestMatchers("/api/tasks/public/*/ai/logs").permitAll()
+
+
+                        .anyRequest().permitAll())
+                .addFilterBefore(jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

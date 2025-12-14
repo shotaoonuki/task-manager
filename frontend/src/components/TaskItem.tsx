@@ -1,20 +1,27 @@
-import React from "react";
-import type { Task, Priority, EditData } from "../types/task";
+import type { TaskItem as TaskItemType, Priority, EditData } from "../types/task";
 import { Trash2 } from "lucide-react";
 import SubtaskList from "./SubtaskList";
+import React, { useState } from "react";
+import { getTaskAiDecision } from "../api/taskApi";
+import { updateTaskState } from "../api/taskApi";
+import AiDecisionLogList from "./AiDecisionLogList";
+import toast from "react-hot-toast";
+
 
 type Props = {
-  task: Task;
+  task: TaskItemType;
   editingId: number | null;
   editData: EditData;
   onChangeEditData: (data: EditData) => void;
-  onSaveEdit: (task: Task) => void;
+  onSaveEdit: (task: TaskItemType) => void;
   onCancelEdit: () => void;
-  onToggleComplete: (task: Task) => void;
+  onToggleComplete: (task: TaskItemType) => void;
   onDelete: (id: number) => void;
-  onClickTask: (task: Task) => void;
+  onClickTask: (task: TaskItemType) => void;
   priorityColor: Record<Priority, string>;
   getDueDateColor: (dueDate: string | null) => string;
+  onRefreshTasks: () => void;
+
 };
 
 export default function TaskItem({
@@ -29,20 +36,86 @@ export default function TaskItem({
   onClickTask,
   priorityColor,
   getDueDateColor,
+  onRefreshTasks, // ★ これを追加
 }: Props) {
+  const stateRowStyle: Record<string, string> = {
+    PENDING: "bg-white",
+    EXECUTING: "bg-blue-50 border-l-4 border-blue-400",
+    DONE: "bg-green-50 opacity-80",
+  };
+
+
   const isEditing = editingId === task.id;
+  const [aiDecision, setAiDecision] = useState<{
+    nextState: "PENDING" | "EXECUTING" | "DONE";
+    reason: string;
+  } | null>(null);
+
+  const [loadingAi, setLoadingAi] = useState(false);
+
+  const onAskAi = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // ← 行クリックを止める（重要）
+    setLoadingAi(true);
+    try {
+      const res = await getTaskAiDecision(task.id);
+      setAiDecision(res);
+    } catch (err) {
+      console.error(err);
+      alert("AI判断の取得に失敗しました");
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
+  const onApplyAi = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!aiDecision) return;
+
+    try {
+      await updateTaskState(task.id, aiDecision.nextState);
+
+      if (aiDecision.nextState === task.state) {
+        toast.success("AI判断を反映しました（状態変更なし）");
+      } else {
+        toast.success(
+          `AI判断を反映しました：${stateLabelMap[aiDecision.nextState]}`
+        );
+      }
+
+      onRefreshTasks();
+      setAiDecision(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("AI判断の反映に失敗しました");
+    }
+  };
+
+
+  const stateLabelMap: Record<string, string> = {
+    PENDING: "未着手",
+    EXECUTING: "進行中",
+    DONE: "完了",
+  };
+
+  const stateColorMap: Record<string, string> = {
+    PENDING: "bg-gray-200 text-gray-700",
+    EXECUTING: "bg-blue-100 text-blue-700",
+    DONE: "bg-green-100 text-green-700",
+  };
 
   return (
+
     <li
       className={`
         flex flex-col sm:flex-row sm:items-center justify-between
         p-4 rounded-xl border
         transition-all duration-200
-        ${
-          task.completed
-            ? "bg-gray-100/80 text-gray-400 line-through scale-[0.98]"
-            : "bg-white hover:shadow-lg hover:-translate-y-0.5"
+         ${stateRowStyle[task.state]}
+${task.state === "DONE"
+          ? "bg-gray-100/80 text-gray-400 line-through scale-[0.98]"
+          : "bg-white hover:shadow-lg hover:-translate-y-0.5"
         }
+
       `}
     >
       {isEditing ? (
@@ -106,14 +179,30 @@ export default function TaskItem({
           >
             <div className="flex items-center gap-3">
               {/* チェックボックスにアニメーション */}
-              <input
+              {/* <input
                 type="checkbox"
                 checked={task.completed}
                 onChange={() => onToggleComplete(task)}
                 className="w-5 h-5 accent-blue-500 transition-transform duration-150 hover:scale-110"
-              />
+              /> */}
 
               <div className="flex flex-col">
+                {/* ★ 状態バッジ */}
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full w-fit mb-1 ${stateColorMap[task.state]
+                    }`}
+                >
+                  {stateLabelMap[task.state]}
+                </span>
+
+                {/* 👇 ここに入れる */}
+                {task.state === "EXECUTING" && (
+                  <div className="text-xs text-gray-400 mb-1">
+                    AI判断済み
+                  </div>
+                )}
+
+
                 <p className="text-lg font-medium">{task.title}</p>
 
                 {task.dueDate && (
@@ -128,6 +217,7 @@ export default function TaskItem({
                   </p>
                 )}
               </div>
+
             </div>
 
             {/* 削除アイコン（ホバーで赤く） */}
@@ -145,7 +235,54 @@ export default function TaskItem({
               <Trash2 size={18} />
             </button>
           </div>
+
+          {/* 🤖 AI判断 */}
+          {task.state !== "DONE" && (
+            <div className="mt-3">
+              <button
+                onClick={onAskAi}
+                disabled={loadingAi}
+                className="
+        px-4 py-2
+        rounded-lg
+        border border-blue-300
+        text-blue-600 text-sm font-medium
+        bg-white
+        hover:bg-blue-50
+        transition-colors
+        disabled:opacity-50
+      "
+              >
+                AI判定
+              </button>
+
+              {aiDecision && (
+                <div className="mt-2 rounded-lg border p-2 bg-slate-50">
+                  <div className="font-semibold text-sm">
+                    AI提案：{aiDecision.nextState}
+                  </div>
+                  <div className="text-xs text-gray-600 mb-2">
+                    {aiDecision.reason}
+                  </div>
+
+                  <button
+                    onClick={onApplyAi}
+                    className="text-xs px-2 py-1 border rounded hover:bg-blue-50"
+                  >
+                    この提案を反映
+                  </button>
+                </div>
+              )}
+
+              <AiDecisionLogList taskId={task.id} />
+            </div>
+          )}
+
+
+
+
           <SubtaskList taskId={task.id} />
+
         </>
       )}
     </li>

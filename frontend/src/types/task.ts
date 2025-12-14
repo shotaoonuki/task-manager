@@ -1,13 +1,17 @@
 export type Priority = "low" | "medium" | "high";
+export type TaskState = "PENDING" | "EXECUTING" | "DONE";
 
-export interface Task {
+export interface TaskItem {
   id: number;
   title: string;
   description?: string;
   completed: boolean;
   dueDate: string | null;
   priority: Priority;
+  state: TaskState;
+  createdAt: string;
 }
+
 
 export interface Subtask {
   id: number;

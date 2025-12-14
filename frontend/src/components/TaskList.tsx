@@ -67,6 +67,22 @@ export default function TaskList() {
     low: "text-green-500",
   };
 
+  const stateOrder: Record<"EXECUTING" | "PENDING" | "DONE", number> = {
+    EXECUTING: 0,
+    PENDING: 1,
+    DONE: 2,
+  };
+
+  // const sortedTasks = [...filteredTasks].sort((a, b) => {
+  //   // ① 状態で並び替え
+  //   // const stateDiff = stateOrder[a.state] - stateOrder[b.state];
+  //   // if (stateDiff !== 0) return stateDiff;
+
+  //   // ② 同じ状態なら「新しい順」
+  //   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  // });
+
+
   const getDueDateColor = (dueDate: string | null) => {
     if (!dueDate) return "text-gray-400";
     const today = new Date();
@@ -199,6 +215,7 @@ export default function TaskList() {
             onClickTask={handleClickTask}
             priorityColor={priorityColor}
             getDueDateColor={getDueDateColor}
+            onRefreshTasks={fetchTasks} // ★ 追加
           />
         ))}
       </ul>
@@ -214,6 +231,7 @@ export default function TaskList() {
           priorityColor={priorityColor}
           getDueDateColor={getDueDateColor}
         />
+
       )}
     </div>
   );
