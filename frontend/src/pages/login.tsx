@@ -24,10 +24,18 @@ export default function Login({ setIsAuthed }: Props) {
       toast.success("ログイン成功！");
       navigate("/");              // ★ window.location.href を使わない
 
-    } catch (err) {
-      toast.error("ログインに失敗しました");
+    } catch (err: any) {
+      const status = err?.response?.status;
+
+      if (status === 401) {
+        toast.error("メールアドレスまたはパスワードが違います");
+      } else {
+        toast.error("ログインに失敗しました（サーバーエラー）");
+      }
+
       console.error(err);
     }
+
   };
 
 

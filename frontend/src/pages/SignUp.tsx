@@ -23,9 +23,18 @@ export default function SignUp({ setIsAuthed }: Props) {
 
       toast.success("登録が完了しました！");
       navigate("/");
-    } catch (err) {
-      toast.error("登録に失敗しました");
+    } catch (err: any) {
+      const status = err?.response?.status;
+
+      if (status === 409) {
+        toast.error("このメールアドレスはすでに登録されています");
+      } else {
+        toast.error("新規登録に失敗しました");
+      }
+
+      console.error(err);
     }
+
   };
 
   return (
