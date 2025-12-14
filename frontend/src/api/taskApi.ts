@@ -37,9 +37,18 @@ export async function updateTaskState(
   taskId: number,
   state: "PENDING" | "EXECUTING" | "DONE"
 ): Promise<Task> {
-  const res = await api.put(`/api/tasks/${taskId}/state`, { state });
+
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  const url = isLoggedIn
+    ? `/api/tasks/${taskId}/state`
+    : `/api/tasks/public/${taskId}/state`;
+
+  const res = await api.put(url, { state });
   return res.data;
 }
+
+
 
 // AI判断ログ型
 export interface AiDecisionLog {

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { getTaskAiDecision } from "../api/taskApi";
 import { updateTaskState } from "../api/taskApi";
 import AiDecisionLogList from "./AiDecisionLogList";
+import toast from "react-hot-toast";
 
 
 type Props = {
@@ -46,7 +47,7 @@ export default function TaskItem({
 
   const isEditing = editingId === task.id;
   const [aiDecision, setAiDecision] = useState<{
-    nextState: string;
+    nextState: "PENDING" | "EXECUTING" | "DONE";
     reason: string;
   } | null>(null);
 
@@ -71,15 +72,24 @@ export default function TaskItem({
     if (!aiDecision) return;
 
     try {
-      await updateTaskState(task.id, aiDecision.nextState as any);
+      await updateTaskState(task.id, aiDecision.nextState);
+
+      if (aiDecision.nextState === task.state) {
+        toast.success("AI判断を反映しました（状態変更なし）");
+      } else {
+        toast.success(
+          `AI判断を反映しました：${stateLabelMap[aiDecision.nextState]}`
+        );
+      }
+
       onRefreshTasks();
       setAiDecision(null);
-
     } catch (err) {
       console.error(err);
-      alert("状態の更新に失敗しました");
+      toast.error("AI判断の反映に失敗しました");
     }
   };
+
 
   const stateLabelMap: Record<string, string> = {
     PENDING: "未着手",
@@ -168,12 +178,12 @@ export default function TaskItem({
           >
             <div className="flex items-center gap-3">
               {/* チェックボックスにアニメーション */}
-              <input
+              {/* <input
                 type="checkbox"
                 checked={task.completed}
                 onChange={() => onToggleComplete(task)}
                 className="w-5 h-5 accent-blue-500 transition-transform duration-150 hover:scale-110"
-              />
+              /> */}
 
               <div className="flex flex-col">
                 {/* ★ 状態バッジ */}
@@ -187,7 +197,7 @@ export default function TaskItem({
                 {/* 👇 ここに入れる */}
                 {task.state !== "PENDING" && (
                   <div className="text-xs text-gray-400 mb-1">
-                    🤖 AI判断済み
+                    AI判断済み
                   </div>
                 )}
 
@@ -229,10 +239,21 @@ export default function TaskItem({
             <button
               onClick={onAskAi}
               disabled={loadingAi}
-              className="text-sm px-3 py-1 border rounded-lg hover:bg-gray-100"
+              className="
+    px-4 py-2
+    rounded-lg
+    border border-blue-300
+    text-blue-600 text-sm font-medium
+    bg-white
+    hover:bg-blue-50
+    transition-colors
+    disabled:opacity-50
+  "
             >
-              🤖 AIに相談
+              AI判断
             </button>
+
+
 
             {aiDecision && (
               <div className="mt-2 rounded-lg border p-2 bg-slate-50">

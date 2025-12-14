@@ -165,6 +165,22 @@ public class TaskController {
         }
     }
 
+    @PutMapping("/public/{id}/state")
+    public Task updatePublicTaskState(@PathVariable Long id, @RequestBody UpdateStateRequest req) {
+        Task task = taskRepository.findByIdAndUser(id, null)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+
+        task.setState(req.getState());
+
+        if (req.getState() == TaskState.DONE) {
+            task.setCompleted(true);
+        }
+
+        return taskRepository.save(task);
+    }
+
+
+
     // ==========================================
     // 共通：ログイン中ユーザー取得
     // ==========================================

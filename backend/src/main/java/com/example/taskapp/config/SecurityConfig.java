@@ -59,6 +59,8 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.PUT, "/api/tasks/*/state").permitAll()
 
+                        .requestMatchers(HttpMethod.PUT, "/api/tasks/public/**").permitAll()
+
 
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter,
