@@ -37,6 +37,12 @@ export default function TaskItem({
   getDueDateColor,
   onRefreshTasks, // ★ これを追加
 }: Props) {
+  const stateRowStyle: Record<string, string> = {
+    PENDING: "bg-white",
+    EXECUTING: "bg-blue-50 border-l-4 border-blue-400",
+    DONE: "bg-green-50 opacity-80",
+  };
+
 
   const isEditing = editingId === task.id;
   const [aiDecision, setAiDecision] = useState<{
@@ -88,11 +94,13 @@ export default function TaskItem({
   };
 
   return (
+
     <li
       className={`
         flex flex-col sm:flex-row sm:items-center justify-between
         p-4 rounded-xl border
         transition-all duration-200
+         ${stateRowStyle[task.state]}
         ${task.completed
           ? "bg-gray-100/80 text-gray-400 line-through scale-[0.98]"
           : "bg-white hover:shadow-lg hover:-translate-y-0.5"
@@ -175,6 +183,13 @@ export default function TaskItem({
                 >
                   {stateLabelMap[task.state]}
                 </span>
+
+                {/* 👇 ここに入れる */}
+                {task.state !== "PENDING" && (
+                  <div className="text-xs text-gray-400 mb-1">
+                    🤖 AI判断済み
+                  </div>
+                )}
 
                 <p className="text-lg font-medium">{task.title}</p>
 
