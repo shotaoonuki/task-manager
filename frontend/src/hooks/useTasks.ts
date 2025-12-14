@@ -26,12 +26,8 @@ export function useTasks() {
 
   const token = localStorage.getItem("token");
 
-  // ==============================
-  // 初回読み込み
-  // ==============================
-  useEffect(() => {
-    fetchTasks();
-  }, [token]);
+
+
 
 
 
@@ -61,6 +57,14 @@ export function useTasks() {
       setLoading(false);
     }
   };
+
+  // ==============================
+  // 初回読み込み
+  // ==============================
+  useEffect(() => {
+    fetchTasks();
+  }, [token]);
+
 
   const handleAdd = async (task: Partial<TaskItem>) => {
     try {

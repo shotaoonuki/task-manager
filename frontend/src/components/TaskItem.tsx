@@ -1,7 +1,7 @@
-import type { TaskItem, Priority, EditData } from "../types/task";
+import type { TaskItem as TaskItemType, Priority, EditData } from "../types/task";
 import { Trash2 } from "lucide-react";
 import SubtaskList from "./SubtaskList";
-import { useState } from "react";
+import React, { useState } from "react";
 import { getTaskAiDecision } from "../api/taskApi";
 import { updateTaskState } from "../api/taskApi";
 import AiDecisionLogList from "./AiDecisionLogList";
@@ -9,15 +9,15 @@ import toast from "react-hot-toast";
 
 
 type Props = {
-  task: TaskItem;
+  task: TaskItemType;
   editingId: number | null;
   editData: EditData;
   onChangeEditData: (data: EditData) => void;
-  onSaveEdit: (task: TaskItem) => void;
+  onSaveEdit: (task: TaskItemType) => void;
   onCancelEdit: () => void;
-  onToggleComplete: (task: TaskItem) => void;
+  onToggleComplete: (task: TaskItemType) => void;
   onDelete: (id: number) => void;
-  onClickTask: (task: TaskItem) => void;
+  onClickTask: (task: TaskItemType) => void;
   priorityColor: Record<Priority, string>;
   getDueDateColor: (dueDate: string | null) => string;
   onRefreshTasks: () => void;
