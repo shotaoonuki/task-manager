@@ -11,12 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.example.taskapp.service.TaskService;
-import com.example.taskapp.dto.TaskAiDecisionResponse;
 import com.example.taskapp.dto.UpdateStateRequest;
 import com.example.taskapp.service.TaskAiDecisionService;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
 import com.example.taskapp.dto.CreateTaskRequest;
 import com.example.taskapp.entity.AiDecisionLog;
@@ -43,8 +40,6 @@ public class TaskController {
         this.taskService = taskService;
         this.taskAiDecisionService = taskAiDecisionService;
     }
-
-
 
     // ==========================================
     // 🔹 ログイン中ユーザー用 API

@@ -27,7 +27,7 @@ public class TaskAiDecisionController {
         this.taskAiDecisionService = taskAiDecisionService;
     }
 
-    // 🤖 AIに相談
+    // AI判定
     @PostMapping("/{taskId}/ai/decision")
     public TaskAiDecisionResponse decide(@PathVariable Long taskId) {
         User user = getCurrentUserOrNull();
