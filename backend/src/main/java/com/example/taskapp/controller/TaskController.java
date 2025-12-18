@@ -30,7 +30,6 @@ public class TaskController {
     private final TaskService taskService;
     private final TaskAiDecisionService taskAiDecisionService;
 
-
     public TaskController(TaskRepository taskRepository, UserRepository userRepository,
             SubtaskRepository subtaskRepository, TaskService taskService,
             TaskAiDecisionService taskAiDecisionService) {
@@ -118,7 +117,6 @@ public class TaskController {
         return taskService.createTask(request, null);
     }
 
-
     @PutMapping("/public/{id}")
     public Task updatePublicTask(@PathVariable Long id, @RequestBody Task updatedTask) {
         Task task = taskRepository.findByIdAndUser(id, null)
@@ -180,8 +178,6 @@ public class TaskController {
         return taskAiDecisionService.getLogsByTaskId(taskId);
     }
 
-
-
     // ==========================================
     // 共通：ログイン中ユーザー取得
     // ==========================================
@@ -213,6 +209,4 @@ public class TaskController {
 
         return taskRepository.save(task);
     }
-
-
 }
