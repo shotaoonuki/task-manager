@@ -165,7 +165,7 @@ npm install
 npm run dev  
 
 バックエンドのみ  
-cd backend/taskapp  
+cd backend
 ./mvnw spring-boot:run  
 
 ---
