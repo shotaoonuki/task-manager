@@ -15,7 +15,6 @@ export default function Login({ setIsAuthed }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const res = await api.post("/auth/login", { email, password });
 
