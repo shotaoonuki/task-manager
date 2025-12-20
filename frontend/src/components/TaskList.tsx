@@ -6,10 +6,8 @@ import TaskModal from "./TaskModal";
 import type { Priority } from "../types/task";
 import toast from "react-hot-toast";
 
-
 export default function TaskList() {
   const {
-    tasks,
     filteredTasks,
     selectedTask,
     loading,
@@ -82,7 +80,6 @@ export default function TaskList() {
   //   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   // });
 
-
   const getDueDateColor = (dueDate: string | null) => {
     if (!dueDate) return "text-gray-400";
     const today = new Date();
@@ -148,22 +145,25 @@ export default function TaskList() {
       <div className="flex justify-center gap-2 mb-4">
         <button
           onClick={() => setFilter("all")}
-          className={`px-3 py-1 rounded ${filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+          className={`px-3 py-1 rounded ${
+            filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
         >
           すべて
         </button>
         <button
           onClick={() => setFilter("active")}
-          className={`px-3 py-1 rounded ${filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+          className={`px-3 py-1 rounded ${
+            filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
         >
           未完了
         </button>
         <button
           onClick={() => setFilter("completed")}
-          className={`px-3 py-1 rounded ${filter === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+          className={`px-3 py-1 rounded ${
+            filter === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
         >
           完了
         </button>
@@ -171,9 +171,7 @@ export default function TaskList() {
         <select
           value={sortOption}
           onChange={(e) =>
-            setSortOption(
-              e.target.value as "default" | "dueDate" | "priority"
-            )
+            setSortOption(e.target.value as "default" | "dueDate" | "priority")
           }
           className="ml-4 border rounded-lg p-1"
         >
@@ -193,7 +191,6 @@ export default function TaskList() {
         >
           🔄 サーバーと同期
         </button>
-
       </div>
 
       {loading && <p className="text-gray-500 text-center">📡 読み込み中...</p>}
@@ -231,7 +228,6 @@ export default function TaskList() {
           priorityColor={priorityColor}
           getDueDateColor={getDueDateColor}
         />
-
       )}
     </div>
   );
