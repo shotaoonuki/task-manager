@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 type Props = {
   setIsAuthed: (v: boolean) => void;
@@ -22,13 +23,17 @@ export default function Login({ setIsAuthed }: Props) {
       setIsAuthed(true);
       toast.success("ログイン成功！");
       navigate("/");
-    } catch (err: any) {
-      const status = err?.response?.status;
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
 
-      if (status === 401) {
-        toast.error("メールアドレスまたはパスワードが違います");
+        if (status === 401) {
+          toast.error("メールアドレスまたはパスワードが違います");
+        } else {
+          toast.error("ログインに失敗しました（サーバーエラー）");
+        }
       } else {
-        toast.error("ログインに失敗しました（サーバーエラー）");
+        toast.error("予期しないエラーが発生しました");
       }
       console.error(err);
     }
@@ -71,7 +76,6 @@ export default function Login({ setIsAuthed }: Props) {
         >
           → 初めての方はこちら（新規登録）
         </p>
-
       </form>
     </div>
   );
