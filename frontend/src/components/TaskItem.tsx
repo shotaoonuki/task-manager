@@ -195,7 +195,6 @@ ${
                   {stateLabelMap[task.state]}
                 </span>
 
-                {/* 👇 ここに入れる */}
                 {task.state === "EXECUTING" && (
                   <div className="text-xs text-gray-400 mb-1">AI判断済み</div>
                 )}
