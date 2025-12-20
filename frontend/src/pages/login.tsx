@@ -22,7 +22,7 @@ export default function Login({ setIsAuthed }: Props) {
       setIsAuthed(true);
       toast.success("ログイン成功！");
       navigate("/");
-    } catch (err) {
+    } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
 
@@ -34,6 +34,7 @@ export default function Login({ setIsAuthed }: Props) {
       } else {
         toast.error("予期しないエラーが発生しました");
       }
+
       console.error(err);
     }
   };

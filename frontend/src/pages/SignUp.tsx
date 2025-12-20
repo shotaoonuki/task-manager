@@ -20,23 +20,25 @@ export default function SignUp({ setIsAuthed }: Props) {
       const res = await api.post("/auth/register", { email, password });
 
       localStorage.setItem("token", res.data.token);
-      setIsAuthed(true); // ★ ここで state 更新
+      setIsAuthed(true);
 
       toast.success("登録が完了しました！");
       navigate("/");
-    } catch (err) {
+    } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-      const status = err?.response?.status;
+        const status = err.response?.status;
 
-      if (status === 409) {
-        toast.error("このメールアドレスはすでに登録されています");
+        if (status === 409) {
+          toast.error("このメールアドレスはすでに登録されています");
+        } else {
+          toast.error("新規登録に失敗しました");
+        }
       } else {
-        toast.error("新規登録に失敗しました");
+        toast.error("予期しないエラーが発生しました");
       }
 
       console.error(err);
     }
-
   };
 
   return (
