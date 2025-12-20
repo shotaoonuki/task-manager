@@ -7,7 +7,6 @@ type Props = {
   setIsAuthed: (v: boolean) => void;
 };
 
-
 export default function Login({ setIsAuthed }: Props) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -20,10 +19,9 @@ export default function Login({ setIsAuthed }: Props) {
       const res = await api.post("/auth/login", { email, password });
 
       localStorage.setItem("token", res.data.token);
-      setIsAuthed(true);           // ★ 追加
+      setIsAuthed(true);
       toast.success("ログイン成功！");
-      navigate("/");              // ★ window.location.href を使わない
-
+      navigate("/");
     } catch (err: any) {
       const status = err?.response?.status;
 
@@ -32,10 +30,8 @@ export default function Login({ setIsAuthed }: Props) {
       } else {
         toast.error("ログインに失敗しました（サーバーエラー）");
       }
-
       console.error(err);
     }
-
   };
 
   return (
