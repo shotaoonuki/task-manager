@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 type Props = {
   setIsAuthed: (v: boolean) => void;
@@ -23,7 +24,8 @@ export default function SignUp({ setIsAuthed }: Props) {
 
       toast.success("登録が完了しました！");
       navigate("/");
-    } catch (err: any) {
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
       const status = err?.response?.status;
 
       if (status === 409) {
