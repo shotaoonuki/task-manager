@@ -6,7 +6,6 @@ import TaskList from "./components/TaskList";
 import Login from "./pages/login";
 import SignUp from "./pages/SignUp";
 import Navbar from "./components/Navbar";
-import { useAuth } from "./context/AuthContext";
 
 export default function App() {
   const [isAuthed, setIsAuthed] = React.useState(
@@ -19,10 +18,6 @@ export default function App() {
         position="top-center"
         toastOptions={{ duration: 4000 }}
       />
-
-
-
-
 
       <Navbar
         isAuthed={isAuthed}
