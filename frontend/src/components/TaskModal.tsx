@@ -2,6 +2,7 @@ import React from "react";
 import type { TaskItem, Priority } from "../types/task";
 import { useState } from "react";
 import { getTaskAiDecision, updateTaskState } from "../api/taskApi";
+import type { TaskState } from "../types/task";
 
 type Props = {
   task: TaskItem;
@@ -22,9 +23,8 @@ export default function TaskModal({
   priorityColor,
   getDueDateColor,
 }: Props) {
-  console.log("🔥 TaskModal actually rendered", task.id);
   const [aiDecision, setAiDecision] = useState<{
-    nextState: string;
+    nextState: TaskState;
     reason: string;
   } | null>(null);
 
@@ -47,10 +47,10 @@ export default function TaskModal({
     if (!aiDecision) return;
 
     try {
-      await updateTaskState(task.id, aiDecision.nextState as any);
+      await updateTaskState(task.id, aiDecision.nextState);
       alert("AI提案を反映しました");
       onClose();
-    } catch (e) {
+    } catch {
       alert("状態更新に失敗しました");
     }
   };
@@ -66,7 +66,6 @@ export default function TaskModal({
         className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full z-50"
         onClick={(e) => e.stopPropagation()}
       >
-
         <h2 className="text-2xl font-bold mb-2">{task.title}</h2>
 
         {/* 🤖 AI判断 */}
@@ -107,7 +106,6 @@ export default function TaskModal({
             </button>
           </div>
         )}
-
 
         <p className="text-gray-600 mb-2">
           締切：{" "}
