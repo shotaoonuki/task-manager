@@ -4,13 +4,15 @@ import type { TaskItem, TaskState, EditData, Priority } from "../types/task";
 import { generateSubtasks } from "../api/subtaskApi";
 import toast from "react-hot-toast";
 import { updateTaskState } from "../api/taskApi";
+import axios from "axios";
+import { useCallback } from "react";
 
 export function useTasks() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
-  const [filter, setFilter] =
-    useState<"all" | "active" | "completed">("all");
-  const [sortOption, setSortOption] =
-    useState<"default" | "dueDate" | "priority">("default");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+  const [sortOption, setSortOption] = useState<
+    "default" | "dueDate" | "priority"
+  >("default");
 
   const [selectedTask, setSelectedTask] = useState<TaskItem | null>(null);
 
@@ -26,15 +28,10 @@ export function useTasks() {
 
   const token = localStorage.getItem("token");
 
-
-
-
-
-
   // ==============================
   // API 呼び分け（★★★修正ポイント★★★）
   // ==============================
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -44,11 +41,17 @@ export function useTasks() {
       // レスポンスが配列であることを確認
       const tasksData = Array.isArray(res.data) ? res.data : [];
       setTasks(tasksData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to fetch tasks:", err);
-      const errorMessage = err.response?.status === 404
-        ? "バックエンドサーバーが起動していないか、エンドポイントが見つかりません"
-        : err.response?.data?.message || "タスク取得に失敗しました";
+      let errorMessage = "タスク取得に失敗しました";
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 404) {
+          errorMessage =
+            "バックエンドサーバーが起動していないか、エンドポイントが見つかりません";
+        } else if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
+        }
+      }
       setError(errorMessage);
       toast.error(errorMessage);
       // エラー時も空配列を設定
@@ -56,15 +59,14 @@ export function useTasks() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   // ==============================
   // 初回読み込み
   // ==============================
   useEffect(() => {
     fetchTasks();
-  }, [token]);
-
+  }, [fetchTasks]);
 
   const handleAdd = async (task: Partial<TaskItem>) => {
     try {
@@ -73,7 +75,6 @@ export function useTasks() {
 
       setTasks(Array.isArray(tasks) ? [...tasks, res.data] : [res.data]);
       toast.success("タスクを追加しました");
-      return res.data;
     } catch {
       toast.error("追加に失敗しました");
       return null;
@@ -106,27 +107,22 @@ export function useTasks() {
         const res = await api.post(url, tempTask);
         createdTask = res.data;
         console.log("Task created:", createdTask);
-      } catch (taskError: any) {
+      } catch (taskError: unknown) {
         console.error("Failed to create task:", taskError);
-        console.error("Error details:", {
-          status: taskError.response?.status,
-          statusText: taskError.response?.statusText,
-          data: taskError.response?.data,
-          message: taskError.message,
-        });
 
-        let errorMessage = "タスクの作成に失敗しました";
-        if (taskError.response?.status === 404) {
-          errorMessage = "バックエンドサーバーが起動していないか、エンドポイントが見つかりません。バックエンドサーバーを起動してください。";
-        } else if (taskError.response?.status === 401) {
-          errorMessage = "認証が必要です。ログインしてください。";
-        } else if (taskError.response?.data?.message) {
-          errorMessage = taskError.response.data.message;
-        } else if (taskError.message) {
-          errorMessage = taskError.message;
+        let message = "タスクの作成に失敗しました";
+        if (axios.isAxiosError(taskError)) {
+          if (taskError.response?.status === 404) {
+            message =
+              "バックエンドサーバーが起動していないか、エンドポイントが見つかりません";
+          } else if (taskError.response?.status === 401) {
+            message = "認証が必要です。ログインしてください。";
+          } else if (taskError.response?.data?.message) {
+            message = taskError.response.data.message;
+          }
         }
 
-        toast.error(errorMessage);
+        toast.error(message);
         return;
       }
 
@@ -142,25 +138,19 @@ export function useTasks() {
           taskTitle: taskTitle,
         });
         console.log("Subtasks generated successfully");
-      } catch (subtaskError: any) {
+      } catch (subtaskError: unknown) {
         console.error("Failed to generate subtasks:", subtaskError);
-        console.error("Subtask error details:", {
-          status: subtaskError.response?.status,
-          statusText: subtaskError.response?.statusText,
-          data: subtaskError.response?.data,
-          message: subtaskError.message,
-        });
 
-        let errorMessage = "サブタスクの生成に失敗しました";
-        if (subtaskError.response?.status === 404) {
-          errorMessage = "サブタスク生成エンドポイントが見つかりません";
-        } else if (subtaskError.response?.data?.message) {
-          errorMessage = subtaskError.response.data.message;
-        } else if (subtaskError.message) {
-          errorMessage = subtaskError.message;
+        let message = "サブタスクの生成に失敗しました";
+        if (axios.isAxiosError(subtaskError)) {
+          if (subtaskError.response?.status === 404) {
+            message = "サブタスク生成エンドポイントが見つかりません";
+          } else if (subtaskError.response?.data?.message) {
+            message = subtaskError.response.data.message;
+          }
         }
 
-        toast.error(errorMessage);
+        toast.error(message);
         return;
       }
 
@@ -168,19 +158,15 @@ export function useTasks() {
       await fetchTasks();
 
       toast.success("サブタスクを生成しました！");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Unexpected error in handleGenerateSubtasks:", error);
-      toast.error(
-        error.response?.data?.message || error.message || "サブタスクの生成に失敗しました"
-      );
+      toast.error("予期しないエラーが発生しました");
     }
   };
 
   const handleDelete = async (id: number) => {
     try {
-      const url = token
-        ? `/api/tasks/${id}`
-        : `/api/tasks/public/${id}`;
+      const url = token ? `/api/tasks/${id}` : `/api/tasks/public/${id}`;
 
       await api.delete(url);
 
@@ -192,15 +178,7 @@ export function useTasks() {
   };
 
   const handleToggleComplete = async (task: TaskItem) => {
-    const updated = { ...task, completed: !task.completed };
-
     try {
-      // const url = token
-      //   ? `/api/tasks/${task.id}`
-      //   : `/api/tasks/public/${task.id}`;
-
-      // await api.put(url, updated);
-
       await updateTaskState(task.id, "DONE");
       toast.success("タスクを完了にしました");
       fetchTasks();
@@ -251,56 +229,52 @@ export function useTasks() {
   // ==============================
   // ソート & フィルタ
   // ==============================
-  const stateOrder: Record<TaskState, number> = {
-    EXECUTING: 0,
-    PENDING: 1,
-    DONE: 2,
-  };
+  const stateOrder = useMemo<Record<TaskState, number>>(
+    () => ({
+      EXECUTING: 0,
+      PENDING: 1,
+      DONE: 2,
+    }),
+    []
+  );
 
-  const priorityOrder: Record<Priority, number> = {
-    high: 0,
-    medium: 1,
-    low: 2,
-  };
+  const priorityOrder = useMemo<Record<Priority, number>>(
+    () => ({
+      high: 0,
+      medium: 1,
+      low: 2,
+    }),
+    []
+  );
 
-  const sortTasks = (list: TaskItem[]) => {
-    console.log("🧪 sortTasks run", { sortOption, count: list.length });
+  const sortTasks = useCallback(
+    (list: TaskItem[]) => {
+      return [...list].sort((a, b) => {
+        const stateDiff = stateOrder[a.state] - stateOrder[b.state];
+        if (stateDiff !== 0) return stateDiff;
 
-    console.table(
-      list.map((t) => ({
-        id: t.id,
-        state: t.state,
-        dueDate: t.dueDate,
-        priority: t.priority,
-        createdAt: t.createdAt,
-      }))
-    );
+        if (sortOption === "dueDate") {
+          if (a.dueDate && b.dueDate) {
+            const diff =
+              new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+            if (diff !== 0) return diff;
+          }
+          if (a.dueDate && !b.dueDate) return -1;
+          if (!a.dueDate && b.dueDate) return 1;
+        }
 
-    return [...list].sort((a, b) => {
-      const stateDiff = stateOrder[a.state] - stateOrder[b.state];
-      if (stateDiff !== 0) return stateDiff;
-
-      if (sortOption === "dueDate") {
-        if (a.dueDate && b.dueDate) {
-          const diff =
-            new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        if (sortOption === "priority") {
+          const diff = priorityOrder[a.priority] - priorityOrder[b.priority];
           if (diff !== 0) return diff;
         }
-        if (a.dueDate && !b.dueDate) return -1;
-        if (!a.dueDate && b.dueDate) return 1;
-      }
 
-      if (sortOption === "priority") {
-        const diff = priorityOrder[a.priority] - priorityOrder[b.priority];
-        if (diff !== 0) return diff;
-      }
-
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  };
-
-
-
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+    },
+    [sortOption, stateOrder, priorityOrder]
+  );
 
   const filteredTasks = useMemo(() => {
     if (!Array.isArray(tasks) || tasks.length === 0) {
@@ -314,19 +288,7 @@ export function useTasks() {
     });
 
     return sortTasks(filtered);
-  }, [tasks, filter, sortOption]);
-
-  // const filteredTasks = (() => {
-  //   if (!Array.isArray(tasks) || tasks.length === 0) {
-  //     return [];
-  //   }
-  //   const filtered = tasks.filter((task) => {
-  //     if (filter === "completed") return task.completed;
-  //     if (filter === "active") return !task.completed;
-  //     return true;
-  //   });
-  //   return sortTasks(filtered);
-  // })();
+  }, [tasks, filter, sortTasks]);
 
   // ==============================
   // 進捗率
@@ -336,9 +298,7 @@ export function useTasks() {
     : 0;
   const totalCount = Array.isArray(tasks) ? tasks.length : 0;
   const progress =
-    totalCount > 0
-      ? Math.round((completedCount / totalCount) * 100)
-      : 0;
+    totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   // ==============================
   // return
