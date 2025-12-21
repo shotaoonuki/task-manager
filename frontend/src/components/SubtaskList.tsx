@@ -30,14 +30,11 @@ export default function SubtaskList({ taskId }: Props) {
         if (!abortController.signal.aborted) {
           setSubtasks(data);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         // AbortError/ERR_CANCELEDは無視（リクエストがキャンセルされた場合）
-        const isCanceled = 
-          error.name === 'AbortError' || 
-          error.code === 'ERR_CANCELED' || 
-          error.message === 'canceled' ||
-          abortController.signal.aborted;
-        
+        const isCanceled =
+          error instanceof DOMException && error.name === "AbortError";
+
         if (!isCanceled) {
           console.error("Failed to load subtasks:", error);
         }
@@ -127,4 +124,3 @@ export default function SubtaskList({ taskId }: Props) {
     </div>
   );
 }
-
