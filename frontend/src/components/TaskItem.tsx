@@ -1,4 +1,8 @@
-import type { TaskItem as TaskItemType, Priority, EditData } from "../types/task";
+import type {
+  TaskItem as TaskItemType,
+  Priority,
+  EditData,
+} from "../types/task";
 import { Trash2 } from "lucide-react";
 import SubtaskList from "./SubtaskList";
 import React, { useState } from "react";
@@ -6,7 +10,6 @@ import { getTaskAiDecision } from "../api/taskApi";
 import { updateTaskState } from "../api/taskApi";
 import AiDecisionLogList from "./AiDecisionLogList";
 import toast from "react-hot-toast";
-
 
 type Props = {
   task: TaskItemType;
@@ -21,7 +24,6 @@ type Props = {
   priorityColor: Record<Priority, string>;
   getDueDateColor: (dueDate: string | null) => string;
   onRefreshTasks: () => void;
-
 };
 
 export default function TaskItem({
@@ -31,19 +33,17 @@ export default function TaskItem({
   onChangeEditData,
   onSaveEdit,
   onCancelEdit,
-  onToggleComplete,
   onDelete,
   onClickTask,
   priorityColor,
   getDueDateColor,
-  onRefreshTasks, // ★ これを追加
+  onRefreshTasks,
 }: Props) {
   const stateRowStyle: Record<string, string> = {
     PENDING: "bg-white",
     EXECUTING: "bg-blue-50 border-l-4 border-blue-400",
     DONE: "bg-green-50 opacity-80",
   };
-
 
   const isEditing = editingId === task.id;
   const [aiDecision, setAiDecision] = useState<{
@@ -90,7 +90,6 @@ export default function TaskItem({
     }
   };
 
-
   const stateLabelMap: Record<string, string> = {
     PENDING: "未着手",
     EXECUTING: "進行中",
@@ -104,17 +103,17 @@ export default function TaskItem({
   };
 
   return (
-
     <li
       className={`
         flex flex-col sm:flex-row sm:items-center justify-between
         p-4 rounded-xl border
         transition-all duration-200
          ${stateRowStyle[task.state]}
-${task.state === "DONE"
-          ? "bg-gray-100/80 text-gray-400 line-through scale-[0.98]"
-          : "bg-white hover:shadow-lg hover:-translate-y-0.5"
-        }
+${
+  task.state === "DONE"
+    ? "bg-gray-100/80 text-gray-400 line-through scale-[0.98]"
+    : "bg-white hover:shadow-lg hover:-translate-y-0.5"
+}
 
       `}
     >
@@ -189,19 +188,16 @@ ${task.state === "DONE"
               <div className="flex flex-col">
                 {/* ★ 状態バッジ */}
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full w-fit mb-1 ${stateColorMap[task.state]
-                    }`}
+                  className={`text-xs px-2 py-0.5 rounded-full w-fit mb-1 ${
+                    stateColorMap[task.state]
+                  }`}
                 >
                   {stateLabelMap[task.state]}
                 </span>
 
-                {/* 👇 ここに入れる */}
                 {task.state === "EXECUTING" && (
-                  <div className="text-xs text-gray-400 mb-1">
-                    AI判断済み
-                  </div>
+                  <div className="text-xs text-gray-400 mb-1">AI判断済み</div>
                 )}
-
 
                 <p className="text-lg font-medium">{task.title}</p>
 
@@ -217,7 +213,6 @@ ${task.state === "DONE"
                   </p>
                 )}
               </div>
-
             </div>
 
             {/* 削除アイコン（ホバーで赤く） */}
@@ -278,11 +273,7 @@ ${task.state === "DONE"
             </div>
           )}
 
-
-
-
           <SubtaskList taskId={task.id} />
-
         </>
       )}
     </li>

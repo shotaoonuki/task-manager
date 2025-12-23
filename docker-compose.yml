@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 
 services:
   # ============================
@@ -10,13 +10,10 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: "http://localhost:8080"
-        # VITE_API_URL: "http://api:8080" 
     ports:
-      - "3000:80"   # ★ 変更（超重要）
+      - "3000:80" # ★ 変更（超重要）
     depends_on:
       - api
-    env_file:
-      - ./frontend/.env.docker
     networks:
       - app-net
 
@@ -35,7 +32,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
       - db
-    restart: always   # ←これを追加
+    restart: always # ←これを追加
     networks:
       - app-net
 

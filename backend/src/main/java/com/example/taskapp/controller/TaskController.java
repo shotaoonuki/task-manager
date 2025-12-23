@@ -11,12 +11,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.example.taskapp.service.TaskService;
-import com.example.taskapp.dto.TaskAiDecisionResponse;
 import com.example.taskapp.dto.UpdateStateRequest;
 import com.example.taskapp.service.TaskAiDecisionService;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
 import com.example.taskapp.dto.CreateTaskRequest;
 import com.example.taskapp.entity.AiDecisionLog;
@@ -33,7 +30,6 @@ public class TaskController {
     private final TaskService taskService;
     private final TaskAiDecisionService taskAiDecisionService;
 
-
     public TaskController(TaskRepository taskRepository, UserRepository userRepository,
             SubtaskRepository subtaskRepository, TaskService taskService,
             TaskAiDecisionService taskAiDecisionService) {
@@ -43,8 +39,6 @@ public class TaskController {
         this.taskService = taskService;
         this.taskAiDecisionService = taskAiDecisionService;
     }
-
-
 
     // ==========================================
     // 🔹 ログイン中ユーザー用 API
@@ -123,7 +117,6 @@ public class TaskController {
         return taskService.createTask(request, null);
     }
 
-
     @PutMapping("/public/{id}")
     public Task updatePublicTask(@PathVariable Long id, @RequestBody Task updatedTask) {
         Task task = taskRepository.findByIdAndUser(id, null)
@@ -185,8 +178,6 @@ public class TaskController {
         return taskAiDecisionService.getLogsByTaskId(taskId);
     }
 
-
-
     // ==========================================
     // 共通：ログイン中ユーザー取得
     // ==========================================
@@ -218,6 +209,4 @@ public class TaskController {
 
         return taskRepository.save(task);
     }
-
-
 }

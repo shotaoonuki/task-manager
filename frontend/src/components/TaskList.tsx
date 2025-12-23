@@ -5,11 +5,10 @@ import TaskForm from "./TaskForm";
 import TaskModal from "./TaskModal";
 import type { Priority } from "../types/task";
 import toast from "react-hot-toast";
-
+import type { TaskItem as TaskItemType } from "../types/task";
 
 export default function TaskList() {
   const {
-    tasks,
     filteredTasks,
     selectedTask,
     loading,
@@ -67,22 +66,6 @@ export default function TaskList() {
     low: "text-green-500",
   };
 
-  const stateOrder: Record<"EXECUTING" | "PENDING" | "DONE", number> = {
-    EXECUTING: 0,
-    PENDING: 1,
-    DONE: 2,
-  };
-
-  // const sortedTasks = [...filteredTasks].sort((a, b) => {
-  //   // ① 状態で並び替え
-  //   // const stateDiff = stateOrder[a.state] - stateOrder[b.state];
-  //   // if (stateDiff !== 0) return stateDiff;
-
-  //   // ② 同じ状態なら「新しい順」
-  //   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  // });
-
-
   const getDueDateColor = (dueDate: string | null) => {
     if (!dueDate) return "text-gray-400";
     const today = new Date();
@@ -97,7 +80,7 @@ export default function TaskList() {
   // クリック（モーダルか編集か）
   let clickTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  const handleClickTask = (task: any) => {
+  const handleClickTask = (task: TaskItemType) => {
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       clickTimeout = null;
@@ -148,22 +131,25 @@ export default function TaskList() {
       <div className="flex justify-center gap-2 mb-4">
         <button
           onClick={() => setFilter("all")}
-          className={`px-3 py-1 rounded ${filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+          className={`px-3 py-1 rounded ${
+            filter === "all" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
         >
           すべて
         </button>
         <button
           onClick={() => setFilter("active")}
-          className={`px-3 py-1 rounded ${filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+          className={`px-3 py-1 rounded ${
+            filter === "active" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
         >
           未完了
         </button>
         <button
           onClick={() => setFilter("completed")}
-          className={`px-3 py-1 rounded ${filter === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+          className={`px-3 py-1 rounded ${
+            filter === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
         >
           完了
         </button>
@@ -171,9 +157,7 @@ export default function TaskList() {
         <select
           value={sortOption}
           onChange={(e) =>
-            setSortOption(
-              e.target.value as "default" | "dueDate" | "priority"
-            )
+            setSortOption(e.target.value as "default" | "dueDate" | "priority")
           }
           className="ml-4 border rounded-lg p-1"
         >
@@ -193,7 +177,6 @@ export default function TaskList() {
         >
           🔄 サーバーと同期
         </button>
-
       </div>
 
       {loading && <p className="text-gray-500 text-center">📡 読み込み中...</p>}
@@ -231,7 +214,6 @@ export default function TaskList() {
           priorityColor={priorityColor}
           getDueDateColor={getDueDateColor}
         />
-
       )}
     </div>
   );

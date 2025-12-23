@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 type Props = {
   setIsAuthed: (v: boolean) => void;
 };
-
 
 export default function Login({ setIsAuthed }: Props) {
   const navigate = useNavigate();
@@ -15,29 +15,29 @@ export default function Login({ setIsAuthed }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       const res = await api.post("/auth/login", { email, password });
 
       localStorage.setItem("token", res.data.token);
-      setIsAuthed(true);           // ★ 追加
+      setIsAuthed(true);
       toast.success("ログイン成功！");
-      navigate("/");              // ★ window.location.href を使わない
+      navigate("/");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
 
-    } catch (err: any) {
-      const status = err?.response?.status;
-
-      if (status === 401) {
-        toast.error("メールアドレスまたはパスワードが違います");
+        if (status === 401) {
+          toast.error("メールアドレスまたはパスワードが違います");
+        } else {
+          toast.error("ログインに失敗しました（サーバーエラー）");
+        }
       } else {
-        toast.error("ログインに失敗しました（サーバーエラー）");
+        toast.error("予期しないエラーが発生しました");
       }
 
       console.error(err);
     }
-
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -76,7 +76,6 @@ export default function Login({ setIsAuthed }: Props) {
         >
           → 初めての方はこちら（新規登録）
         </p>
-
       </form>
     </div>
   );

@@ -7,14 +7,10 @@ import com.example.taskapp.dto.TaskAiDecisionResponse;
 import com.example.taskapp.entity.AiDecisionLog;
 import com.example.taskapp.entity.Task;
 import com.example.taskapp.entity.TaskState;
-import com.example.taskapp.service.OpenAIService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.example.taskapp.dto.TaskAiDecisionResponse;
 import com.example.taskapp.dto.TaskAiDecisionOpenAiResponse;
 import com.example.taskapp.repository.AiDecisionLogRepository;
 import java.util.List;
-
-
 
 @Service
 public class TaskAiDecisionService {

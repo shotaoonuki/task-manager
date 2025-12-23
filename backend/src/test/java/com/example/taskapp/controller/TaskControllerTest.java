@@ -1,8 +1,5 @@
 package com.example.taskapp.controller;
 
-import com.example.taskapp.TaskappApplication;
-
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,20 +12,18 @@ import org.springframework.test.context.jdbc.Sql;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Sql("/data-test.sql")  // ← テスト用ユーザー登録
+@Sql("/data-test.sql") // ← テスト用ユーザー登録
 class TaskControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    @WithMockUser(username = "user")  // auth.getName() = "user"
+    @WithMockUser(username = "user") // auth.getName() = "user"
     void testGetTasks_Returns200() throws Exception {
-        mockMvc.perform(get("/api/tasks"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/tasks")).andExpect(status().isOk());
     }
 }

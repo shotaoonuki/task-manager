@@ -2,7 +2,6 @@ package com.example.taskapp.controller;
 
 import com.example.taskapp.dto.LoginRequest;
 import com.example.taskapp.dto.LoginResponse;
-import com.example.taskapp.dto.LoginResponse;
 import com.example.taskapp.dto.RegisterRequest;
 import com.example.taskapp.entity.User;
 import com.example.taskapp.security.JwtUtil;
@@ -25,13 +24,13 @@ public class AuthController {
     @PostMapping("/register")
     public LoginResponse register(@RequestBody RegisterRequest request) {
         String token = authService.register(request);
-        return new LoginResponse(token);  // ← 登録時も JSON 返す
+        return new LoginResponse(token); // ← 登録時も JSON 返す
     }
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
         String token = authService.login(request);
-        return new LoginResponse(token);  // ← JSON {"token": "..."} で返す
+        return new LoginResponse(token); // ← JSON {"token": "..."} で返す
     }
 
     // ログイン中のユーザー情報

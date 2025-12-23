@@ -41,9 +41,8 @@ export default function TaskForm({
       setIsGenerating(true);
       await onGenerateSubtasks(newTitle);
       // 成功メッセージはuseTasks内で表示されるため、ここでは表示しない
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to generate subtasks in TaskForm:", error);
-      // エラーメッセージはuseTasks内で表示されるため、ここでは表示しない
     } finally {
       setIsGenerating(false);
     }
