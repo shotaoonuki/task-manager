@@ -14,7 +14,10 @@ export async function generateSubtasks(
   return res.data;
 }
 
-export async function getSubtasks(taskId: number, signal?: AbortSignal): Promise<Subtask[]> {
+export async function getSubtasks(
+  taskId: number,
+  signal?: AbortSignal
+): Promise<Subtask[]> {
   const res = await api.get(`/api/tasks/${taskId}/subtasks`, {
     signal,
   });
@@ -26,7 +29,10 @@ export async function updateSubtask(
   subtaskId: number,
   subtask: Partial<Subtask>
 ): Promise<Subtask> {
-  const res = await api.put(`/api/tasks/${taskId}/subtasks/${subtaskId}`, subtask);
+  const res = await api.put(
+    `/api/tasks/${taskId}/subtasks/${subtaskId}`,
+    subtask
+  );
   return res.data;
 }
 
@@ -36,4 +42,3 @@ export async function deleteSubtask(
 ): Promise<void> {
   await api.delete(`/api/tasks/${taskId}/subtasks/${subtaskId}`);
 }
-
