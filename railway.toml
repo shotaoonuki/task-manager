@@ -1,6 +1,0 @@
-[build]
-builder = "dockerfile"
-root = "backend"
-
-[deploy]
-startCommand = ""

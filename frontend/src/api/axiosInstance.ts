@@ -34,8 +34,8 @@ api.interceptors.request.use((config) => {
   }
   // デバッグ用：リクエストURLをログ出力
   if (import.meta.env.DEV) {
-    const fullUrl = config.baseURL 
-      ? `${config.baseURL}${config.url}` 
+    const fullUrl = config.baseURL
+      ? `${config.baseURL}${config.url}`
       : config.url;
     console.log("📤 API Request:", config.method?.toUpperCase(), fullUrl);
     if (config.data) {
@@ -49,13 +49,22 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     if (import.meta.env.DEV) {
-      console.log("✅ API Response:", response.config.method?.toUpperCase(), response.config.url, response.status);
+      console.log(
+        "✅ API Response:",
+        response.config.method?.toUpperCase(),
+        response.config.url,
+        response.status
+      );
     }
     return response;
   },
   (error) => {
     // AbortControllerによるキャンセルは正常な動作なので、エラーとして扱わない
-    if (error.code === 'ERR_CANCELED' || error.name === 'AbortError' || error.message === 'canceled') {
+    if (
+      error.code === "ERR_CANCELED" ||
+      error.name === "AbortError" ||
+      error.message === "canceled"
+    ) {
       if (import.meta.env.DEV) {
         console.log("🚫 Request canceled (正常な動作)");
       }
@@ -63,8 +72,8 @@ api.interceptors.response.use(
     }
 
     if (import.meta.env.DEV) {
-      const fullUrl = error.config?.baseURL 
-        ? `${error.config.baseURL}${error.config.url}` 
+      const fullUrl = error.config?.baseURL
+        ? `${error.config.baseURL}${error.config.url}`
         : error.config?.url;
       console.error("❌ API Error:", {
         url: fullUrl,
