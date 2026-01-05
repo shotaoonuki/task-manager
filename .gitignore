@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Google OAuth tokens (DO NOT COMMIT) 
+backend/tokens/
+
+# Google OAuth client secrets
+backend/src/main/resources/client_secret.json

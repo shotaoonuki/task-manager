@@ -5,11 +5,16 @@ import type {
 } from "../types/task";
 import { Trash2 } from "lucide-react";
 import SubtaskList from "./SubtaskList";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getTaskAiDecision } from "../api/taskApi";
 import { updateTaskState } from "../api/taskApi";
 import AiDecisionLogList from "./AiDecisionLogList";
 import toast from "react-hot-toast";
+import { startAgentRun } from "../api/agent";
+import { AgentRun } from ".././types/agent";
+import { AgentStep } from ".././types/AgentStep";
+import { fetchAgentRun, fetchAgentSteps, resumeAgentRun } from "../api/agent";
+import { AgentRunPanel } from "./agent/AgentRunPanel";
 
 type Props = {
   task: TaskItemType;
@@ -50,6 +55,34 @@ export default function TaskItem({
     nextState: "PENDING" | "EXECUTING" | "DONE";
     reason: string;
   } | null>(null);
+
+  const [agentRun, setAgentRun] = useState<AgentRun | null>(null);
+  const [agentSteps, setAgentSteps] = useState<AgentStep[]>([]);
+
+  const handleStartAgent = async () => {
+    const runId = await startAgentRun(task.id);
+
+    const run = await fetchAgentRun(runId);
+    const steps = await fetchAgentSteps(runId);
+
+    setAgentRun(run);
+    setAgentSteps(steps);
+  };
+
+  // const handleStartAgent = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const runId = await startAgentRun(task.id);
+  //     setAgentRunId(runId);
+  //   } catch (e: any) {
+  //     const message =
+  //       e.response?.data?.message ?? "AIエージェントの起動に失敗しました";
+
+  //     alert(message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const [loadingAi, setLoadingAi] = useState(false);
 
@@ -101,6 +134,26 @@ export default function TaskItem({
     EXECUTING: "bg-blue-100 text-blue-700",
     DONE: "bg-green-100 text-green-700",
   };
+
+  useEffect(() => {
+    if (!agentRun) return;
+
+    if (agentRun.status === "RUNNING") {
+      const timer = setInterval(async () => {
+        const run = await fetchAgentRun(agentRun.id);
+        const steps = await fetchAgentSteps(agentRun.id);
+
+        setAgentRun(run);
+        setAgentSteps(steps);
+
+        if (run.status === "COMPLETED" || run.status === "FAILED") {
+          clearInterval(timer);
+        }
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [agentRun?.id, agentRun?.status]);
 
   return (
     <li
@@ -230,6 +283,42 @@ ${
               <Trash2 size={18} />
             </button>
           </div>
+
+          <button onClick={handleStartAgent}>🤖 AIに計画を立てさせる</button>
+
+          {!task.dueDate && (
+            <p className="text-xs text-gray-400 mt-1">
+              ※ AIが締切日を必要と判断した場合、入力を求められます
+            </p>
+          )}
+
+          {agentRun && (
+            <AgentRunPanel
+              agentRun={agentRun}
+              steps={agentSteps}
+              onResume={async () => {
+                await resumeAgentRun(agentRun.id);
+
+                const refresh = async () => {
+                  const run = await fetchAgentRun(agentRun.id);
+                  const steps = await fetchAgentSteps(agentRun.id);
+                  setAgentRun(run);
+                  setAgentSteps(steps);
+                };
+
+                // 即1回
+                await refresh();
+
+                // 少し待ってもう一度（Agent が裏で進む時間）
+                setTimeout(refresh, 500);
+                setTimeout(refresh, 1500);
+              }}
+              onApproved={async () => {
+                setAgentRun(null);
+                onRefreshTasks();
+              }}
+            />
+          )}
 
           {/* 🤖 AI判断 */}
           {task.state !== "DONE" && (

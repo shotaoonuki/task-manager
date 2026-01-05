@@ -40,32 +40,32 @@ public class SecurityConfig {
         })).sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
+                        // OAuth（Google認証）
+                        .requestMatchers("/oauth/**").permitAll()
+
                         // public API
                         .requestMatchers("/api/tasks/public/**").permitAll()
 
                         // subtasks（ログイン不要）
                         .requestMatchers("/api/tasks/*/subtasks/**").permitAll()
 
-                        // ★ AI判断（これを必ず追加）
+                        // AI判断
                         .requestMatchers("/api/tasks/*/ai/decision").permitAll()
+
+                        // ★★★ AIエージェント（ここを追加・重要）
+                        .requestMatchers("/api/agent-runs/**").permitAll()
 
                         // auth
                         .requestMatchers("/auth/**").permitAll()
 
-                        // その他 API
-                        .requestMatchers("/api/**").authenticated()
-
-                        .requestMatchers("/api/tasks/*/state").permitAll()
-
-                        .requestMatchers(HttpMethod.PUT, "/api/tasks/*/state").permitAll()
-
-                        .requestMatchers(HttpMethod.PUT, "/api/tasks/public/**").permitAll()
-
                         // ★ AI判断ログ（public）
                         .requestMatchers("/api/tasks/public/*/ai/logs").permitAll()
 
+                        // その他 API（最後にまとめる）
+                        .requestMatchers("/api/**").authenticated()
 
                         .anyRequest().permitAll())
+
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
 

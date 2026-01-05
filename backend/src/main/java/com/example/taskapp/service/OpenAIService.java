@@ -129,6 +129,29 @@ public class OpenAIService {
         }
     }
 
+    public List<String> prioritizeSubtasks(List<String> subtasks) {
+        String prompt = """
+                以下のサブタスクを、実行すべき順番に並び替えてください。
+                出力は JSON 配列のみ。
+
+                サブタスク:
+                %s
+                """.formatted(String.join("\n", subtasks));
+
+        String res = chat(prompt);
+
+        try {
+            JsonNode node = objectMapper.readTree(res);
+            List<String> result = new ArrayList<>();
+            for (JsonNode n : node) {
+                result.add(n.asText());
+            }
+            return result;
+        } catch (Exception e) {
+            return subtasks; // フェイルセーフ
+        }
+    }
+
 
 }
 
